@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>People Analytics — Assessoria de Investimentos</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+<style>
+:root{
+  --bg:#F5EDD7;--card:#FFF;--navy:#1B3A6B;--navy2:#2D6A9F;
+  --gold:#C4922A;--orange:#E87722;--teal:#0B6E8C;
+  --green:#1A6B3C;--red:#9B1C1C;--purple:#5B21B6;
+  --text:#1E293B;--muted:#64748B;--border:#D4C5A9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.4}
+
+/* HEADER */
+.hdr{background:var(--navy);padding:18px 32px 0;position:sticky;top:0;z-index:100;box-shadow:0 3px 16px rgba(0,0,0,.25)}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hdr h1{color:#fff;font-size:19px;font-weight:700} .hdr h1 em{color:#F5C842;font-style:normal}
+.hdr-sub{color:rgba(255,255,255,.55);font-size:10.5px;margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.hdr-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+            color:#F5C842;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700}
+.pdf-btn{background:var(--gold);color:#fff;border:none;border-radius:20px;
+          padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;
+          display:flex;align-items:center;gap:6px;transition:.2s}
+.pdf-btn:hover{background:#a67820}
+.nav{display:flex;gap:2px;margin-top:14px;flex-wrap:wrap}
+.nt{padding:9px 16px;border-radius:6px 6px 0 0;cursor:pointer;color:rgba(255,255,255,.6);
+     font-size:11px;font-weight:600;background:rgba(255,255,255,.07);border:none;transition:.15s}
+.nt:hover{color:#fff;background:rgba(255,255,255,.14)}
+.nt.on{color:#F5C842;background:rgba(255,255,255,.16)}
+.nt.ext-tab{color:#F5C842}
+
+/* SECTIONS */
+.sec{display:none;padding:24px 32px 32px}.sec.on{display:block}
+.pg{display:grid;gap:20px}
+.pg2{grid-template-columns:1fr 1fr}.pg3{grid-template-columns:1fr 1fr 1fr}
+.pg31{grid-template-columns:1.4fr 1fr}.pg13{grid-template-columns:1fr 1.4fr}
+@media(max-width:860px){.pg2,.pg3,.pg31,.pg13{grid-template-columns:1fr}}
+
+/* CARDS */
+.card{background:var(--card);border-radius:10px;padding:20px;
+       box-shadow:0 1px 4px rgba(27,58,107,.08);border:1px solid var(--border)}
+.ct{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+     color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ct::before{content:"";display:block;width:3px;height:14px;border-radius:2px;background:var(--navy)}
+.acc-gold .ct::before{background:var(--gold)}.acc-teal .ct::before{background:var(--teal)}
+.acc-red .ct::before{background:var(--red)}.acc-green .ct::before{background:var(--green)}
+.acc-purple .ct::before{background:var(--purple)}.acc-orange .ct::before{background:var(--orange)}
+
+/* KPI */
+.kpig{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border-radius:10px;padding:16px 18px;
+      border:1px solid var(--border);border-top:3px solid var(--navy);
+      box-shadow:0 1px 4px rgba(27,58,107,.07)}
+.kpi.gold{border-top-color:var(--gold)}.kpi.teal{border-top-color:var(--teal)}
+.kpi.red{border-top-color:var(--red)}.kpi.green{border-top-color:var(--green)}
+.kpi.purple{border-top-color:var(--purple)}.kpi.orange{border-top-color:var(--orange)}
+.kl{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;margin-bottom:5px}
+.kv{font-size:32px;font-weight:800;color:var(--navy);line-height:1}
+.kpi.gold .kv{color:var(--gold)}.kpi.teal .kv{color:var(--teal)}.kpi.red .kv{color:var(--red)}
+.kpi.green .kv{color:var(--green)}.kpi.purple .kv{color:var(--purple)}.kpi.orange .kv{color:var(--orange)}
+.ks{font-size:10px;color:var(--muted);margin-top:5px}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#EDE8DC;color:var(--navy);font-weight:700;font-size:10px;text-transform:uppercase;
+    letter-spacing:.5px;padding:8px 10px;text-align:left;border-bottom:2px solid var(--border)}
+td{padding:7px 10px;border-bottom:1px solid #EEE8DA;vertical-align:middle}
+tr:last-child td{border-bottom:none}  tr:hover td{background:#FEFAF3}
+.nr td{background:#FFF8ED} .nr:hover td{background:#FFF0D5}
+.nc{font-weight:500;max-width:200px} .nc2{text-align:right;font-variant-numeric:tabular-nums}
+.pr{text-align:right;color:var(--muted);font-size:11px}
+.bc{width:80px} .mb{height:6px;border-radius:3px;min-width:2px}
+tfoot td{background:#EDE8DC!important;font-weight:700;color:var(--navy)}
+.pos{color:#14532D!important} .neg{color:#7F1D1D!important} .zero{color:var(--muted)}
+
+/* BADGES */
+.bdg{display:inline-block;padding:2px 9px;border-radius:12px;font-size:10px;font-weight:700}
+.vol{background:#DCFCE7;color:#166534} .inv{background:#FEE2E2;color:#991B1B}
+.ac{background:#FEF3C7;color:#92400E}  .nd{background:#F1F5F9;color:#94A3B8}
+.ntag{background:#FFF3E0;color:#C2410C;border:1px solid #FDBA74;border-radius:10px;
+       font-size:9px;font-weight:700;padding:1px 6px;vertical-align:middle}
+.yr25{display:inline-block;padding:1px 8px;border-radius:10px;background:#FEE2E2;color:#991B1B;font-weight:700;font-size:11px}
+.yr26{display:inline-block;padding:1px 8px;border-radius:10px;background:#FEF3C7;color:#92400E;font-weight:700;font-size:11px}
+
+/* CHARTS */
+.cw{position:relative;height:230px} .cw.tall{height:290px} .cw.short{height:180px}
+
+/* FILTER */
+.fbar{background:var(--card);border-radius:8px;padding:11px 16px;margin-bottom:16px;
+       border:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.fbar label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--text);background:#fff;cursor:pointer}
+#cntLbl{margin-left:auto;color:var(--muted);font-size:11px;font-weight:700}
+
+/* TABLE SCROLL */
+.ts{overflow-x:auto;max-height:420px;overflow-y:auto}
+.ts thead th{position:sticky;top:0;z-index:2}
+
+/* RETENCAO */
+.ret-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.ret-card{background:var(--bg);border-radius:8px;padding:14px 16px;border:1px solid var(--border);text-align:center}
+.ret-val{font-size:28px;font-weight:800;margin-bottom:3px}
+.ret-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.prog-wrap{background:#EDE8DC;border-radius:8px;height:12px;overflow:hidden;margin-top:6px}
+.prog{height:100%;border-radius:8px;background:var(--green)}
+
+/* NOTE */
+.note{background:#FEF9EC;border:1px solid #F5C842;border-radius:8px;padding:10px 14px;font-size:11px;color:#78350F;margin-top:12px}
+.stitle{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:20px;padding-bottom:10px;
+         border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px}
+.fonte{font-size:10px;color:var(--muted);margin-top:18px;padding-top:10px;border-top:1px solid var(--border)}
+
+/* EXTRAORDINÁRIOS */
+.ext-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:4px}
+.ext-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;
+           border-top:3px solid var(--gold)}
+.ext-name{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:3px}
+.ext-unit{font-size:11px;color:var(--muted);margin-bottom:10px}
+.ext-rodadas{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.rod-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);display:inline-block}
+.rod-dot.empty{background:var(--border)}
+.ext-label{font-size:11px;color:var(--text)}
+.ext-placeholder{text-align:center;padding:60px 40px;color:var(--muted)}
+.ext-ph-icon{font-size:48px;margin-bottom:16px}
+.ext-placeholder h3{font-size:16px;color:var(--navy);margin-bottom:10px}
+.ext-placeholder p{font-size:12px;margin-bottom:16px;max-width:500px;margin-inline:auto}
+.ph-table{max-width:480px;margin:16px auto;font-size:12px}
+.ph-note{font-size:11px;color:var(--muted);max-width:500px;margin:12px auto 0;
+          background:#FEF9EC;border:1px solid #F5C842;border-radius:8px;padding:10px}
+.ext-placeholder code{background:#EDE8DC;padding:2px 6px;border-radius:4px;font-family:monospace}
+
+/* ═══ PDF MODAL ═══ */
+.pdf-modal{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.6);
+            overflow-y:auto;padding:20px}
+.pdf-modal.open{display:flex;align-items:flex-start;justify-content:center}
+.pdf-inner{background:#fff;border-radius:12px;padding:24px;max-width:860px;width:100%;
+            box-shadow:0 8px 40px rgba(0,0,0,.3)}
+.pdf-modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.pdf-modal-hdr h2{font-size:15px;color:var(--navy);font-weight:700}
+.pdf-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+.pdf-modal-actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.pdf-print-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;
+                padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer}
+.pdf-print-btn:hover{background:var(--navy2)}
+.pdf-note-txt{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* PDF PAGES */
+.pdf-page{border:1px solid #ddd;border-radius:8px;margin-bottom:20px;
+           font-family:Arial,sans-serif;overflow:hidden;background:#fff}
+.pdf-hdr{background:var(--navy);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+.pdf-hdr-left h2{color:#fff;font-size:14px;font-weight:700;margin-bottom:2px}
+.pdf-hdr-left p{color:rgba(255,255,255,.65);font-size:9px}
+.pdf-logo{color:#F5C842;font-size:13px;font-weight:800;letter-spacing:1px;
+           background:rgba(255,255,255,.1);padding:4px 12px;border-radius:4px}
+.pdf-obj{background:#F5EDD7;padding:8px 20px;font-size:10px;color:var(--text);border-bottom:1px solid var(--border)}
+.pdf-obj b{color:var(--navy)}
+.pdf-body{padding:16px 20px}
+.pdf-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.pdf-kpi{border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center}
+.pdf-kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.pdf-kpi-val{font-size:26px;font-weight:800;color:var(--navy)}
+.pdf-kpi.gold .pdf-kpi-val{color:var(--gold)}
+.pdf-kpi.red .pdf-kpi-val{color:var(--red)}
+.pdf-kpi.green .pdf-kpi-val{color:var(--green)}
+.pdf-kpi-sub{font-size:9px;color:var(--muted);margin-top:3px}
+.pdf-section-title{font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;
+                    letter-spacing:.6px;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+/* Meta bars */
+.pm-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pm-unit{font-size:10px;width:110px;flex-shrink:0;color:var(--text)}
+.pm-bars{flex:1}
+.pm-bar-wrap{margin-bottom:3px}
+.pm-bar{height:14px;border-radius:3px;display:flex;align-items:center;padding-left:6px;min-width:24px;transition:.3s}
+.pm-bar span{font-size:9px;font-weight:700;color:#fff;white-space:nowrap}
+.pm-tgt{background:#C4922A;opacity:.5}
+.pm-act{background:var(--green)}
+.pm-gap{font-size:10px;width:32px;flex-shrink:0;text-align:right}
+.pm-legend{display:flex;gap:14px;font-size:9px;color:var(--muted);margin-bottom:8px}
+.pm-leg-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle}
+/* Motivos bars */
+.mot-label{font-size:10px;width:130px;padding:4px 0;white-space:nowrap}
+.mot-bar{padding:3px 0}
+.seg-wrap{display:flex;height:18px;border-radius:3px;overflow:hidden;background:#F5EDD7;width:100%}
+.seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;min-width:18px}
+.sinv{background:var(--red)} .svol{background:var(--green)} .sac{background:var(--gold)}
+.pdf-legend{display:flex;gap:12px;font-size:9px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.pdf-leg-item{display:flex;align-items:center;gap:5px}
+.pdf-leg-dot{width:10px;height:10px;border-radius:2px}
+.pdf-kpis4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+
+/* ═══ PRINT ONLY ═══ */
+@media print {
+  body > *:not(#print-area) { display:none !important }
+  #print-area { display:block !important }
+  .print-page { page-break-after:always; padding:20px; }
+  .print-page:last-child { page-break-after:avoid; }
+  * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+#print-area { display:none; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <h1>People <em>Analytics</em> &nbsp;·&nbsp; Assessoria de Investimentos</h1>
+      <div class="hdr-sub">Headcount: Mar/2026 · Saídas: fechamento 31/03/2026 · Somente time comercial</div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-badge">HC Atual: 197 | Meta Mar: 212</div>
+      <button class="pdf-btn" onclick="openPDF()">&#128196; Exportar PDF</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="nt on"   onclick="go('overview',this)">Visão Geral</button>
+    <button class="nt"      onclick="go('headcount',this)">Headcount</button>
+    <button class="nt"      onclick="go('metas',this)">Metas Q1</button>
+    <button class="nt"      onclick="go('saidas',this)">Saídas</button>
+    <button class="nt"      onclick="go('retencao',this)">Retenção 180d</button>
+    <button class="nt ext-tab" onclick="go('ext',this)">⭐ Extraordinários</button>
+    <button class="nt"      onclick="go('hcvalor',this)">HC Valor</button>
+    <button class="nt"      onclick="go('detalhe',this)">Detalhe 2025/26</button>
+  </div>
+</div>
+
+<!-- ═══ VISÃO GERAL ═══ -->
+<div id="tab-overview" class="sec on">
+  <div class="kpig">
+    <div class="kpi"><div class="kl">Headcount Total</div><div class="kv">197</div><div class="ks">Assessores comerciais ativos</div></div>
+    <div class="kpi gold"><div class="kl">Meta Março/26</div><div class="kv">212</div><div class="ks">Gap: <b class="neg">-15</b></div></div>
+    <div class="kpi teal"><div class="kl">Nexus</div><div class="kv">18</div><div class="ks">Assessores digitais</div></div>
+    <div class="kpi red"><div class="kl">Saídas 2025</div><div class="kv">45</div><div class="ks">Comercial, ano completo</div></div>
+    <div class="kpi red"><div class="kl">Saídas 2026 YTD</div><div class="kv">11</div><div class="ks">Jan–Mar 2026</div></div>
+    <div class="kpi green"><div class="kl">Retenção 180d (2026)</div><div class="kv">100.0%</div><div class="ks">11/11 ficaram 180+ dias</div></div>
+  </div>
+  <div class="pg pg2">
+    <div class="card"><div class="ct">Headcount por Unidade</div><div class="cw"><canvas id="cHcUnit"></canvas></div></div>
+    <div class="card acc-red"><div class="ct">Saídas por Unidade e Origem — 2026</div><div class="cw"><canvas id="cExitStack"></canvas></div></div>
+  </div>
+  <div class="pg pg2">
+    <div class="card acc-gold"><div class="ct">Meta Mar/26 vs Atual por Unidade</div><div class="cw"><canvas id="cMeta"></canvas></div></div>
+    <div class="card acc-teal"><div class="ct">Saídas por Ano — Histórico Comercial</div><div class="cw"><canvas id="cExitsYear"></canvas></div></div>
+  </div>
+  <div class="fonte"><b>Fontes:</b> data(17).xlsx (Headcount Comercial RH) · Lista de Usuários 31-03-2026.xlsx</div>
+</div>
+
+<!-- ═══ HEADCOUNT ═══ -->
+<div id="tab-headcount" class="sec">
+  <div class="stitle">Headcount Comercial — Março 2026</div>
+  <div class="pg pg31">
+    <div class="card">
+      <div class="ct">Por Unidade</div>
+      <table><thead><tr><th>Unidade</th><th class="nc2">HC</th><th class="pr">%</th><th class="bc"></th></tr></thead>
+        <tbody><tr ><td>Vitória</td><td class="nr2"><b>53</b></td><td class="pr">26.9%</td><td class="bc"><div class="mb" style="width:100%;background:#1B3A6B"></div></td></tr>
+<tr ><td>São Paulo</td><td class="nr2"><b>32</b></td><td class="pr">16.2%</td><td class="bc"><div class="mb" style="width:60%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Brasília</td><td class="nr2"><b>26</b></td><td class="pr">13.2%</td><td class="bc"><div class="mb" style="width:49%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Belo Horizonte</td><td class="nr2"><b>21</b></td><td class="pr">10.7%</td><td class="bc"><div class="mb" style="width:40%;background:#1B3A6B"></div></td></tr>
+<tr><td><b>Nexus</b></td><td class="nr2"><b>18</b></td><td class="pr">9.1%</td><td class="bc"><div class="mb" style="width:34%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Rio de Janeiro</td><td class="nr2"><b>14</b></td><td class="pr">7.1%</td><td class="bc"><div class="mb" style="width:26%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Brumadinho</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Goiânia</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Farmer</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Cachoeiro</td><td class="nr2"><b>6</b></td><td class="pr">3.0%</td><td class="bc"><div class="mb" style="width:11%;background:#1B3A6B"></div></td></tr>
+<tr ><td>Linhares</td><td class="nr2"><b>3</b></td><td class="pr">1.5%</td><td class="bc"><div class="mb" style="width:6%;background:#1B3A6B"></div></td></tr>
+</tbody>
+        <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">197</td><td class="pr">100%</td><td></td></tr></tfoot>
+      </table>
+    </div>
+    <div class="card acc-teal">
+      <div class="ct">Por Nível</div>
+      <table><thead><tr><th>Nível</th><th class="nc2">HC</th><th class="pr">%</th></tr></thead>
+        <tbody><tr><td>Júnior</td><td class='nc2'><b>63</b></td><td class='pr'>32.0%</td></tr><tr><td>Pleno</td><td class='nc2'><b>45</b></td><td class='pr'>22.8%</td></tr><tr><td>Digital/Nexus</td><td class='nc2'><b>18</b></td><td class='pr'>9.1%</td></tr><tr><td>Master</td><td class='nc2'><b>14</b></td><td class='pr'>7.1%</td></tr><tr><td>Sênior I</td><td class='nc2'><b>13</b></td><td class='pr'>6.6%</td></tr><tr><td>Líder</td><td class='nc2'><b>12</b></td><td class='pr'>6.1%</td></tr><tr><td>Part-Time</td><td class='nc2'><b>9</b></td><td class='pr'>4.6%</td></tr><tr><td>Investor</td><td class='nc2'><b>8</b></td><td class='pr'>4.1%</td></tr><tr><td>Líder Full</td><td class='nc2'><b>5</b></td><td class='pr'>2.5%</td></tr><tr><td>Formação</td><td class='nc2'><b>4</b></td><td class='pr'>2.0%</td></tr><tr><td>Gestor</td><td class='nc2'><b>4</b></td><td class='pr'>2.0%</td></tr><tr><td>Sênior II</td><td class='nc2'><b>2</b></td><td class='pr'>1.0%</td></tr></tbody>
+        <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">197</td><td class="pr">100%</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="card acc-green" style="margin-top:20px">
+    <div class="ct">Contratações por Ano (Assessores Ativos Hoje)</div>
+    <div class="cw short"><canvas id="cAdm"></canvas></div>
+  </div>
+  <div class="fonte"><b>Fonte:</b> data(17).xlsx · Tipo AAI RH = Comercial</div>
+</div>
+
+<!-- ═══ METAS ═══ -->
+<div id="tab-metas" class="sec">
+  <div class="stitle">Metas de Contratação — 1º Trimestre 2026</div>
+  <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:700px">
+    <div class="kpi"><div class="kl">HC Dez/25</div><div class="kv">204</div><div class="ks">baseline</div></div>
+    <div class="kpi gold"><div class="kl">Meta Mar/26</div><div class="kv">212</div><div class="ks">+8 vs Dez/25</div></div>
+    <div class="kpi"><div class="kl">Atual Mar/26</div><div class="kv">197</div><div class="ks">realizado</div></div>
+    <div class="kpi red"><div class="kl">Gap Março</div><div class="kv">-15</div><div class="ks">abaixo da meta</div></div>
+  </div>
+  <div class="note">
+    <b>Meta Anual:</b> crescimento líquido de <b>+30</b> em 2026. Meta final: <b>234</b>.
+    Variação YTD: <b class="neg">-7</b>.
+    Precisamos de <b class="neg">37</b> adições líquidas nos próximos 9 meses.
+  </div>
+  <div class="card" style="margin-top:20px">
+    <div class="ct">Meta por Unidade — Março 2026</div>
+    <table><thead><tr><th>Unidade</th><th class="nc2">HC Dez/25</th><th class="nc2">Meta Jan</th><th class="nc2">Meta Fev</th><th class="nc2">Meta Mar</th><th class="nc2">Atual Mar/26</th><th class="nc2">Gap</th></tr></thead>
+      <tbody><tr><td>Vitória</td><td class='nc2'>54</td><td class='nc2'>55</td><td class='nc2'>55</td><td class='nc2'><b>55</b></td><td class='nc2'><b>53</b></td><td class='nc2 neg'><b>-2</b></td></tr>
+<tr><td>Cachoeiro</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'><b>8</b></td><td class='nc2'><b>6</b></td><td class='nc2 neg'><b>-2</b></td></tr>
+<tr><td>São Paulo</td><td class='nc2'>31</td><td class='nc2'>32</td><td class='nc2'>32</td><td class='nc2'><b>33</b></td><td class='nc2'><b>32</b></td><td class='nc2 neg'><b>-1</b></td></tr>
+<tr><td>Rio de Janeiro</td><td class='nc2'>17</td><td class='nc2'>17</td><td class='nc2'>18</td><td class='nc2'><b>18</b></td><td class='nc2'><b>14</b></td><td class='nc2 neg'><b>-4</b></td></tr>
+<tr><td>Brasília</td><td class='nc2'>29</td><td class='nc2'>29</td><td class='nc2'>30</td><td class='nc2'><b>30</b></td><td class='nc2'><b>26</b></td><td class='nc2 neg'><b>-4</b></td></tr>
+<tr><td>Goiânia</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'><b>9</b></td><td class='nc2'><b>8</b></td><td class='nc2 neg'><b>-1</b></td></tr>
+<tr><td>Belo Horizonte</td><td class='nc2'>22</td><td class='nc2'>22</td><td class='nc2'>22</td><td class='nc2'><b>23</b></td><td class='nc2'><b>21</b></td><td class='nc2 neg'><b>-2</b></td></tr>
+<tr><td>Brumadinho</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'><b>7</b></td><td class='nc2'><b>8</b></td><td class='nc2 pos'><b>+1</b></td></tr>
+<tr><td>Nexus</td><td class='nc2'>17</td><td class='nc2'>17</td><td class='nc2'>18</td><td class='nc2'><b>18</b></td><td class='nc2'><b>18</b></td><td class='nc2 zero'><b>0</b></td></tr>
+<tr><td>Linhares</td><td class='nc2'>3</td><td class='nc2'>3</td><td class='nc2'>3</td><td class='nc2'><b>3</b></td><td class='nc2'><b>3</b></td><td class='nc2 zero'><b>0</b></td></tr>
+<tr><td>Farmer</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'><b>8</b></td><td class='nc2'><b>8</b></td><td class='nc2 zero'><b>0</b></td></tr>
+</tbody>
+      <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">204</td><td class="nc2">206</td><td class="nc2">209</td><td class="nc2"><b>212</b></td><td class="nc2"><b>197</b></td><td class="nc2 neg"><b>-15</b></td></tr></tfoot>
+    </table>
+  </div>
+  <div class="card acc-gold" style="margin-top:20px">
+    <div class="ct">Progresso vs Meta — Março 2026</div>
+    <div class="cw tall"><canvas id="cMetaBar"></canvas></div>
+  </div>
+  <div class="fonte"><b>Meta Q1:</b> fornecida pelo RH · <b>HC atual:</b> data(17).xlsx Mar/26</div>
+</div>
+
+<!-- ═══ SAÍDAS ═══ -->
+<div id="tab-saidas" class="sec">
+  <div class="stitle">Saídas Comerciais — Assessoria de Investimentos</div>
+  <div class="kpig">
+    <div class="kpi red"><div class="kl">Total Histórico</div><div class="kv">279</div><div class="ks">saídas comerciais</div></div>
+    <div class="kpi red"><div class="kl">2025</div><div class="kv">47</div><div class="ks">ano completo</div></div>
+    <div class="kpi red"><div class="kl">2026 YTD</div><div class="kv">11</div><div class="ks">Jan–Mar/26</div></div>
+    <div class="kpi green"><div class="kl">Voluntárias 2026</div><div class="kv">2</div><div class="ks">18% das classificadas</div></div>
+    <div class="kpi purple"><div class="kl">Involuntárias 2026</div><div class="kv">7</div><div class="ks">64% das classificadas</div></div>
+    <div class="kpi orange"><div class="kl">Acordo 2026</div><div class="kv">1</div><div class="ks">demissão por acordo</div></div>
+  </div>
+  <div class="pg pg2">
+    <div class="card acc-red"><div class="ct">Saídas por Unidade e Origem — 2026</div><div class="cw tall"><canvas id="cStackSaidas"></canvas></div></div>
+    <div class="card"><div class="ct">Saídas por Unidade — Histórico</div>
+      <table><thead><tr><th>Unidade</th><th class="nc2">Total</th><th class="nc2">2025</th><th class="nc2">2026</th></tr></thead>
+        <tbody><tr ><td>Vitória</td><td class="nc2"><b>65</b></td><td class="nc2"><span class="yr25">10</span></td><td class="nc2"><span class="yr26">1</span></td></tr>
+<tr ><td>São Paulo</td><td class="nc2"><b>57</b></td><td class="nc2"><span class="yr25">8</span></td><td class="nc2"><span class="yr26">1</span></td></tr>
+<tr ><td>Brasília</td><td class="nc2"><b>48</b></td><td class="nc2"><span class="yr25">11</span></td><td class="nc2"><span class="yr26">3</span></td></tr>
+<tr ><td>Rio de Janeiro</td><td class="nc2"><b>25</b></td><td class="nc2"><span class="yr25">5</span></td><td class="nc2"><span class="yr26">1</span></td></tr>
+<tr ><td>Belo Horizonte</td><td class="nc2"><b>23</b></td><td class="nc2"><span class="yr25">3</span></td><td class="nc2"><span class="yr26">1</span></td></tr>
+<tr class="nr"><td><b>Nexus</b></td><td class="nc2"><b>22</b></td><td class="nc2"><span class="yr25">2</span></td><td class="nc2"><span class="yr26">1</span></td></tr>
+<tr ><td>Goiânia</td><td class="nc2"><b>19</b></td><td class="nc2"><span class="yr25">5</span></td><td class="nc2"><span class="yr26">2</span></td></tr>
+<tr ><td>Brumadinho</td><td class="nc2"><b>5</b></td><td class="nc2"><span class="yr25">1</span></td><td class="nc2">—</td></tr>
+<tr ><td>Cachoeiro</td><td class="nc2"><b>4</b></td><td class="nc2">—</td><td class="nc2"><span class="yr26">1</span></td></tr>
+<tr ><td>Assessoria PJ</td><td class="nc2"><b>2</b></td><td class="nc2">—</td><td class="nc2">—</td></tr>
+<tr ><td>Private e Farmer</td><td class="nc2"><b>2</b></td><td class="nc2"><span class="yr25">2</span></td><td class="nc2">—</td></tr>
+</tbody>
+        <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">279</td><td class="nc2">47</td><td class="nc2">11</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="pg pg3" style="margin-top:20px">
+    <div class="card acc-red"><div class="ct">Saídas por Ano</div><div class="cw short"><canvas id="cExitsYearDetail"></canvas></div></div>
+    <div class="card acc-purple"><div class="ct">Motivo de Saída — Top 8 (2025/26)</div><div class="cw short"><canvas id="cMotivo"></canvas></div></div>
+    <div class="card acc-teal"><div class="ct">Saídas por Nível (Histórico)</div><div class="cw short"><canvas id="cNivelExits"></canvas></div></div>
+  </div>
+  <div class="fonte"><b>Fonte:</b> Lista de Usuários 31-03-2026.xlsx · Filtro: Cargo Comercial</div>
+</div>
+
+<!-- ═══ RETENÇÃO ═══ -->
+<div id="tab-retencao" class="sec">
+  <div class="stitle">Retenção 180 dias — Desligamentos 2026</div>
+  <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:660px">
+    <div class="kpi green"><div class="kl">Retidos 180d</div><div class="kv">11</div><div class="ks">ficaram ≥ 180 dias</div></div>
+    <div class="kpi green"><div class="kl">% Retidos</div><div class="kv">100.0%</div><div class="ks">dos 11 com data válida</div></div>
+    <div class="kpi teal"><div class="kl">Saíram &lt; 180d</div><div class="kv">0</div><div class="ks">nenhuma saída precoce</div></div>
+    <div class="kpi"><div class="kl">Total Saídas 2026</div><div class="kv">11</div><div class="ks">11 com data de admissão</div></div>
+  </div>
+  <div class="note">Todos os 11 desligamentos de 2026 completaram ao menos 180 dias de empresa antes de sair.</div>
+  <div class="card acc-green" style="margin-top:20px">
+    <div class="ct">Desligamentos 2026 — Tempo de Casa</div>
+    <table><thead><tr><th>Nome</th><th>Admissão</th><th>Saída</th><th class="nc2">Dias de Casa</th><th>Unidade</th><th>Classificação</th></tr></thead>
+      <tbody><tr><td class='nc'>Ana Carolina Felix Martins</td><td>01/10/2025</td><td>30/03/2026</td><td class='nc2'><b style='color:var(--green)'>180</b></td><td>Goiânia</td><td><span class="bdg nd">—</span></td></tr>
+<tr><td class='nc'>Maria Eduarda Hutter</td><td>01/08/2025</td><td>04/03/2026</td><td class='nc2'><b style='color:var(--green)'>215</b></td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Pedro Teixeira Brandao</td><td>15/04/2025</td><td>14/01/2026</td><td class='nc2'><b style='color:var(--green)'>274</b></td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Nicolas Steven Conolly Carruthers</td><td>12/03/2025</td><td>17/03/2026</td><td class='nc2'><b style='color:var(--green)'>370</b></td><td><span class="ntag">Nexus</span></td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Julia Machado Chagas</td><td>07/10/2024</td><td>14/01/2026</td><td class='nc2'><b style='color:var(--green)'>464</b></td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Arthur Duarte Wingler</td><td>18/04/2024</td><td>02/02/2026</td><td class='nc2'><b style='color:var(--green)'>655</b></td><td>Cachoeiro</td><td><span class="bdg ac">Acordo</span></td></tr>
+<tr><td class='nc'>Bernardo Figueiredo Savoi</td><td>28/11/2022</td><td>12/02/2026</td><td class='nc2'><b style='color:var(--green)'>1172</b></td><td>Belo Horizonte</td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Larissa Almeida Geraldini</td><td>22/08/2022</td><td>16/01/2026</td><td class='nc2'><b style='color:var(--green)'>1243</b></td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Cassio Ribeiro Correa</td><td>14/02/2022</td><td>14/01/2026</td><td class='nc2'><b style='color:var(--green)'>1430</b></td><td>Rio de Janeiro</td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Beatriz Silva De Araujo</td><td>03/11/2020</td><td>09/01/2026</td><td class='nc2'><b style='color:var(--green)'>1893</b></td><td>Goiânia</td><td><span class="bdg vol">Voluntário</span></td></tr>
+<tr><td class='nc'>Pedro Henrique Sangaletti Cesar Da Luz</td><td>02/09/2019</td><td>23/03/2026</td><td class='nc2'><b style='color:var(--green)'>2394</b></td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td></tr></tbody>
+    </table>
+  </div>
+  <div class="pg pg2" style="margin-top:20px">
+    <div class="card"><div class="ct">Tempo de Casa (2026)</div><div class="cw short"><canvas id="cDias"></canvas></div></div>
+    <div class="card acc-green">
+      <div class="ct">Retidos vs Saídas Precoces</div>
+      <div class="ret-grid">
+        <div class="ret-card"><div class="ret-val" style="color:var(--green)">100.0%</div><div class="ret-lbl">≥ 180 dias</div><div style="font-size:11px;color:var(--muted);margin-top:6px">11 pessoas</div></div>
+        <div class="ret-card"><div class="ret-val" style="color:var(--muted)">0.0%</div><div class="ret-lbl">&lt; 180 dias</div><div style="font-size:11px;color:var(--muted);margin-top:6px">0 pessoas</div></div>
+      </div>
+      <div class="prog-wrap" style="margin-top:16px"><div class="prog" style="width:100.0%"></div></div>
+    </div>
+  </div>
+  <div class="fonte"><b>Cálculo:</b> Dias = Data Demissão − Data Admissão · Base: desligamentos comerciais 2026</div>
+</div>
+
+<!-- ═══ EXTRAORDINÁRIOS ═══ -->
+<div id="tab-ext" class="sec">
+  <div class="stitle">⭐ Extraordinários — Talentos a Reter</div>
+  
+  <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:720px">
+    <div class="kpi gold"><div class="kl">Total Extraordinários</div><div class="kv">58</div><div class="ks">29.4% do time comercial</div></div>
+    <div class="kpi green"><div class="kl">Ainda Ativos</div><div class="kv">58</div><div class="ks">retenção: 100.0%</div></div>
+    <div class="kpi"><div class="kl">Máx. Rodadas</div><div class="kv">1</div><div class="ks">maior continuidade</div></div>
+    <div class="kpi teal"><div class="kl">Unidades</div><div class="kv">10</div><div class="ks">com extraordinários</div></div>
+  </div>
+  <div class="pg pg13" style="margin-bottom:20px">
+    <div class="card acc-gold">
+      <div class="ct">% Extraordinários por Unidade</div>
+      <table><thead><tr><th>Unidade</th><th class="nc2">Qtd</th><th class="nc2">HC</th><th class="nc2">% da Unidade</th><th class="nc2">Maior série</th></tr></thead>
+      <tbody><tr><td>Vitória</td><td class='nc2'><b>13</b></td><td class='nc2'>53</td><td class='nc2'><b style='color:var(--navy)'>24.5%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Brasília</td><td class='nc2'><b>12</b></td><td class='nc2'>26</td><td class='nc2'><b style='color:var(--navy)'>46.2%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>São Paulo</td><td class='nc2'><b>10</b></td><td class='nc2'>32</td><td class='nc2'><b style='color:var(--navy)'>31.2%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Nexus</td><td class='nc2'><b>6</b></td><td class='nc2'>18</td><td class='nc2'><b style='color:var(--navy)'>33.3%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Belo Horizonte</td><td class='nc2'><b>4</b></td><td class='nc2'>21</td><td class='nc2'><b style='color:var(--navy)'>19.0%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Brumadinho</td><td class='nc2'><b>3</b></td><td class='nc2'>8</td><td class='nc2'><b style='color:var(--navy)'>37.5%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Goiânia</td><td class='nc2'><b>3</b></td><td class='nc2'>8</td><td class='nc2'><b style='color:var(--navy)'>37.5%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Rio de Janeiro</td><td class='nc2'><b>3</b></td><td class='nc2'>14</td><td class='nc2'><b style='color:var(--navy)'>21.4%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Linhares</td><td class='nc2'><b>2</b></td><td class='nc2'>3</td><td class='nc2'><b style='color:var(--navy)'>66.7%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Cachoeiro</td><td class='nc2'><b>2</b></td><td class='nc2'>6</td><td class='nc2'><b style='color:var(--navy)'>33.3%</b></td><td class='nc2'>1 rodada</td></tr>
+</tbody></table>
+    </div>
+    <div class="card">
+      <div class="ct">Distribuição por Unidade</div>
+      <div class="cw"><canvas id="cExtUnit"></canvas></div>
+    </div>
+  </div>
+  <div class="card acc-gold">
+    <div class="ct">Perfis Extraordinários — Histórico de Rodadas</div>
+    <div class="ext-grid"><div class="ext-card">
+          <div class="ext-name">Joao Pedro Gentil Goncalves Da Rocha</div>
+          <div class="ext-unit">Rio de Janeiro</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Vanessa Dos Passos Correa</div>
+          <div class="ext-unit">Rio de Janeiro</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Pedro Fajardo</div>
+          <div class="ext-unit">Rio de Janeiro</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Maíra Andrade</div>
+          <div class="ext-unit">Brumadinho</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Bruno Matosinhos</div>
+          <div class="ext-unit">Belo Horizonte</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Rafael Tome</div>
+          <div class="ext-unit">Brumadinho</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Marcelo Reis</div>
+          <div class="ext-unit">Belo Horizonte</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Alecio Silva</div>
+          <div class="ext-unit">Belo Horizonte</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Tamara Silva</div>
+          <div class="ext-unit">Brumadinho</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Jhady Vasconcelos</div>
+          <div class="ext-unit">Belo Horizonte</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Nicholas</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Lucas Cintra</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Vitor Leal</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Rogério Moraes</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Ian Lopes</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Joyce Rolins</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Henrique Galvão</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Juliana David</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Gustavo Sato</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Danilo Villela</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Thiago Santana</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Felipe Pessoa</div>
+          <div class="ext-unit">Brasília</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Everton Souza</div>
+          <div class="ext-unit">Goiânia</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Dante Araujo</div>
+          <div class="ext-unit">Goiânia</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Fernando</div>
+          <div class="ext-unit">Goiânia</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Douglas Niero</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Murilo Marques</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Maicon Pizzol</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Adyr Nicchio</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Joao Ronchi</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Marcel Lima</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Eduardo Depes</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Henrique Tonoli</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Pedro Silva</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Lucas Miranda</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Fabricio Rodrigues</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Pollyanne Cristina</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Jardel Lago</div>
+          <div class="ext-unit">Vitória</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Luiz Gava</div>
+          <div class="ext-unit">Cachoeiro</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Diogo Meneguelli</div>
+          <div class="ext-unit">Cachoeiro</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Guido Broetto</div>
+          <div class="ext-unit">Linhares</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Gabriel Cecco</div>
+          <div class="ext-unit">Linhares</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Higor Rabelo</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Bernardo</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Daniel Teles</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Luiz Antonio Junior</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Gustavo Trotta</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">João Musso</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Bruno Caldas</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Fabricio Lima</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Keone Kojin</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Aline Cunha</div>
+          <div class="ext-unit">São Paulo</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Yago</div>
+          <div class="ext-unit">Nexus</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Danilo Villela</div>
+          <div class="ext-unit">Nexus</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Mauro</div>
+          <div class="ext-unit">Nexus</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Gabriel Cecco</div>
+          <div class="ext-unit">Nexus</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Lincoln</div>
+          <div class="ext-unit">Nexus</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+<div class="ext-card">
+          <div class="ext-name">Jose</div>
+          <div class="ext-unit">Nexus</div>
+          <div class="ext-rodadas"><span class="rod-dot"></span></div>
+          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
+        </div>
+</div>
+  </div>
+  <div class="fonte"><b>Critério:</b> Extraordinários são profissionais classificados semestralmente pela liderança como talentos prioritários de retenção. Arquivo: extraordinarios.xlsx</div>
+</div>
+
+<!-- ═══ HC VALOR (TOTAL) ═══ -->
+<div id="tab-hcvalor" class="sec">
+  <div class="stitle">Headcount Valor Investimentos — Visão Completa</div>
+
+  <div class="kpig" style="grid-template-columns:repeat(6,1fr);max-width:900px">
+    <div class="kpi"><div class="kl">Total Mar/26</div><div class="kv">293</div><div class="ks">Todos os colaboradores</div></div>
+    <div class="kpi gold"><div class="kl">Comercial</div><div class="kv">216</div><div class="ks">73.7% do total</div></div>
+    <div class="kpi teal"><div class="kl">Suporte ao Negócio</div><div class="kv">32</div><div class="ks">10.9%</div></div>
+    <div class="kpi purple"><div class="kl">Produtos</div><div class="kv">22</div><div class="ks">7.5%</div></div>
+    <div class="kpi orange"><div class="kl">Seguridade e Empresas</div><div class="kv">13</div><div class="ks">4.4%</div></div>
+    <div class="kpi green"><div class="kl">Wealth</div><div class="kv">8</div><div class="ks">2.7%</div></div>
+  </div>
+
+  <div class="pg pg2">
+    <div class="card">
+      <div class="ct">Evolução Mensal — HC Total Valor</div>
+      <div class="cw"><canvas id="cHcValorLine"></canvas></div>
+    </div>
+    <div class="card acc-gold">
+      <div class="ct">Composição por Área — Mar/26</div>
+      <div class="cw"><canvas id="cHcValorPie"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="ct">Evolução Mensal por Área</div>
+    <div class="cw tall"><canvas id="cHcValorStack"></canvas></div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="ct">Headcount por Área — Abr/25 a Mar/26</div>
+    <table>
+      <thead><tr><th>Área</th><th class="nc2">Abr/25</th><th class="nc2">Mai</th><th class="nc2">Jun</th><th class="nc2">Jul</th><th class="nc2">Ago</th><th class="nc2">Set</th><th class="nc2">Out</th><th class="nc2">Nov</th><th class="nc2">Dez</th><th class="nc2">Jan/26</th><th class="nc2">Fev</th><th class="nc2">Mar</th></tr></thead>
+      <tbody>
+        <tr><td><b>Comercial</b></td><td class='nc2'>230</td><td class='nc2'>231</td><td class='nc2'>230</td><td class='nc2'>229</td><td class='nc2'>229</td><td class='nc2'>225</td><td class='nc2'>226</td><td class='nc2'>224</td><td class='nc2'>221</td><td class='nc2'>217</td><td class='nc2'>220</td><td class='nc2'><b>216</b></td></tr>
+        <tr><td><b>Suporte ao Negócio</b></td><td class='nc2'>29</td><td class='nc2'>29</td><td class='nc2'>29</td><td class='nc2'>31</td><td class='nc2'>35</td><td class='nc2'>34</td><td class='nc2'>34</td><td class='nc2'>32</td><td class='nc2'>32</td><td class='nc2'>31</td><td class='nc2'>31</td><td class='nc2'><b>32</b></td></tr>
+        <tr><td><b>Produtos</b></td><td class='nc2'>23</td><td class='nc2'>23</td><td class='nc2'>23</td><td class='nc2'>23</td><td class='nc2'>24</td><td class='nc2'>24</td><td class='nc2'>25</td><td class='nc2'>25</td><td class='nc2'>25</td><td class='nc2'>23</td><td class='nc2'>23</td><td class='nc2'><b>22</b></td></tr>
+        <tr><td><b>Seguridade e Empresas</b></td><td class='nc2'>13</td><td class='nc2'>13</td><td class='nc2'>13</td><td class='nc2'>14</td><td class='nc2'>14</td><td class='nc2'>13</td><td class='nc2'>13</td><td class='nc2'>13</td><td class='nc2'>13</td><td class='nc2'>13</td><td class='nc2'>13</td><td class='nc2'><b>13</b></td></tr>
+        <tr><td><b>Wealth</b></td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'>8</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'><b>8</b></td></tr>
+        <tr><td><b>Outros</b></td><td class='nc2'>0</td><td class='nc2'>0</td><td class='nc2'>0</td><td class='nc2'>0</td><td class='nc2'>1</td><td class='nc2'>1</td><td class='nc2'>1</td><td class='nc2'>1</td><td class='nc2'>1</td><td class='nc2'>1</td><td class='nc2'>1</td><td class='nc2'><b>2</b></td></tr>
+      </tbody>
+      <tfoot><tr><td><b>TOTAL</b></td><td class='nc2'>304</td><td class='nc2'>305</td><td class='nc2'>304</td><td class='nc2'>305</td><td class='nc2'>310</td><td class='nc2'>304</td><td class='nc2'>307</td><td class='nc2'>303</td><td class='nc2'>300</td><td class='nc2'>293</td><td class='nc2'>296</td><td class='nc2'><b>293</b></td></tr></tfoot>
+    </table>
+  </div>
+
+  <div class="fonte"><b>Fonte:</b> Lista de Usuários 31-03-2026.xlsx · Cálculo: Admitidos até o mês com Data Demissão posterior ou ainda ativo</div>
+</div>
+
+<!-- ═══ DETALHE ═══ -->
+<div id="tab-detalhe" class="sec">
+  <div class="stitle">Detalhe — Saídas Comerciais 2025 e 2026</div>
+  <div class="fbar">
+    <label>Unidade:</label>
+    <select id="fUnit" onchange="ft()"><option value="">Todas</option><option value="Belo Horizonte">Belo Horizonte</option><option value="Brasília">Brasília</option><option value="Brumadinho">Brumadinho</option><option value="Cachoeiro">Cachoeiro</option><option value="Goiânia">Goiânia</option><option value="Nexus">Nexus</option><option value="Private e Farmer">Private e Farmer</option><option value="Rio de Janeiro">Rio de Janeiro</option><option value="São Paulo">São Paulo</option><option value="Vitória">Vitória</option></select>
+    <label>Ano:</label>
+    <select id="fAno" onchange="ft()"><option value="">2025 e 2026</option><option value="2025">2025</option><option value="2026">2026</option></select>
+    <label>Classificação:</label>
+    <select id="fCls" onchange="ft()"><option value="">Todas</option><option value="ACORDO">ACORDO</option><option value="INVOLUNTARIO">INVOLUNTARIO</option><option value="VOLUNTARIO">VOLUNTARIO</option></select>
+    <span id="cntLbl"></span>
+  </div>
+  <div class="card"><div class="ts">
+    <table id="dt"><thead><tr><th>Nome</th><th>Data Saída</th><th>Unidade</th><th>Classificação</th><th>Motivo</th><th>Nível</th><th>Equipe</th></tr></thead>
+      <tbody><tr><td class='nc'>Guilherme Schwartz Meireles</td><td>03/01/2025</td><td>Private e Farmer</td><td><span class="bdg vol">Voluntário</span></td><td>CONC ESCRITORIO</td><td>FARMER</td><td>Saiu</td></tr>
+<tr><td class='nc'>Caio Augusto Guimarães Barbosa</td><td>09/01/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Lucas Matias Zedes</td><td>21/01/2025</td><td>Goiânia</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Jose Dallan De Castro Alves Lopes</td><td>01/02/2025</td><td>Goiânia</td><td><span class="bdg vol">Voluntário</span></td><td>CULTURA</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Lucas Ribeiro Arantes</td><td>11/02/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>CULTURA</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Hugo Alves Marinho</td><td>13/02/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Andre Luiz Rezende De Fassio</td><td>17/02/2025</td><td>Rio de Janeiro</td><td><span class="bdg ac">Acordo</span></td><td>PESSOAL</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Tatiana Cristina Da Silva</td><td>19/02/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Fernando Salles Monteiro</td><td>24/02/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Gabriel Bylaardt Meira Rodrigues</td><td>25/02/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Higor Barbosa De Souza</td><td>10/03/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>PLENO</td><td>Saiu</td></tr>
+<tr><td class='nc'>Rafael Salgado Moreira</td><td>12/03/2025</td><td>Rio de Janeiro</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Fernando Antonio De Oliveira</td><td>01/04/2025</td><td>Belo Horizonte</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Lucas De Oliveira Haun</td><td>01/04/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Vittor Nackayo Farias Lima</td><td>01/04/2025</td><td>Goiânia</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Erika Carvalho Almeida</td><td>11/04/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>CONC ESCRITORIO</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Luca Dalla Fina</td><td>16/04/2025</td><td>Goiânia</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Gabrielle Sousa De Oliveira</td><td>05/05/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Diogo Oliveira Bastos</td><td>16/05/2025</td><td>Rio de Janeiro</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Rafael Naves De Souza</td><td>23/05/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Rodrigo Roque De Almeida</td><td>29/05/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>SENIOR I</td><td>Saiu</td></tr>
+<tr><td class='nc'>Lucas Mol Mohamad</td><td>04/06/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Marinna Tiburcio Valeriano</td><td>02/07/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Josenildo Gomes Da Silva</td><td>08/07/2025</td><td>Nexus <span class="ntag">Nexus</span></td><td><span class="bdg vol">Voluntário</span></td><td>OUTROS</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Ana Beatriz Spinelli Ricci Melo</td><td>17/07/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Tatiana De Castro Cajueiro Murta</td><td>24/07/2025</td><td>Private e Farmer</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>FARMER</td><td>Saiu</td></tr>
+<tr><td class='nc'>Joao Moraes Ernandez</td><td>25/07/2025</td><td>Rio de Janeiro</td><td><span class="bdg vol">Voluntário</span></td><td>CONC ESCRITORIO</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Yago Bruno Amaral Iatarola</td><td>01/08/2025</td><td>Belo Horizonte</td><td><span class="bdg vol">Voluntário</span></td><td>CONC ESCRITORIO</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Joab Augusto Ribeiro Teixeira</td><td>01/08/2025</td><td>Goiânia</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Pedro Saggese Pinto Campos</td><td>15/08/2025</td><td>Rio de Janeiro</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Joao Victor Barbosa Rodrigues Da Silva</td><td>22/08/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>INCOMPATIBILIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Lucas Gouveia Ribeiro</td><td>29/08/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Joao Pedro Da Silva</td><td>01/09/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Gabriel Costa Almeida</td><td>03/09/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>INCOMPATIBILIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Sergio Luis Alvarenga</td><td>05/09/2025</td><td>Brumadinho</td><td><span class="bdg vol">Voluntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Joao Luiz Guerini Arpini Filho</td><td>10/09/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>OUTROS</td><td>EXTERNO</td><td>Saiu</td></tr>
+<tr><td class='nc'>Lucca Carasso Leao Borges</td><td>29/09/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>INCOMPATIBILIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Pedro Tavares De Lanna Rocha</td><td>30/09/2025</td><td>Belo Horizonte</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>EXTERNO</td><td>Saiu</td></tr>
+<tr><td class='nc'>Vinicius Araujo Da Silva</td><td>08/10/2025</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Ditmar Schwarzemuller Filho</td><td>28/10/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Gabrielle De Souza Silva</td><td>03/11/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Edmar Serafim Araujo Machado</td><td>05/11/2025</td><td>Nexus <span class="ntag">Nexus</span></td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Guilherme Paranagua Barros</td><td>07/11/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Emerson Deboni De Melo</td><td>01/12/2025</td><td>Vitória</td><td><span class="bdg ac">Acordo</span></td><td>CULTURA</td><td>MASTER</td><td>Saiu</td></tr>
+<tr><td class='nc'>Ariane Lais Ferreira Da Silva</td><td>08/12/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>CONC BANCO</td><td>PLENO</td><td>Saiu</td></tr>
+<tr><td class='nc'>Pietro Da Col Santanna</td><td>12/12/2025</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Raquel Marques Senra Ceravolo</td><td>15/12/2025</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>OUTROS</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Beatriz Silva De Araujo</td><td>09/01/2026</td><td>Goiânia</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Cassio Ribeiro Correa</td><td>14/01/2026</td><td>Rio de Janeiro</td><td><span class="bdg vol">Voluntário</span></td><td>COMPORTAMENTO</td><td>LIDER</td><td>Saiu</td></tr>
+<tr><td class='nc'>Julia Machado Chagas</td><td>14/01/2026</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Pedro Teixeira Brandao</td><td>14/01/2026</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Larissa Almeida Geraldini</td><td>16/01/2026</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>SENIOR II</td><td>Saiu</td></tr>
+<tr><td class='nc'>Arthur Duarte Wingler</td><td>02/02/2026</td><td>Cachoeiro</td><td><span class="bdg ac">Acordo</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Bernardo Figueiredo Savoi</td><td>12/02/2026</td><td>Belo Horizonte</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Maria Eduarda Hutter</td><td>04/03/2026</td><td>Vitória</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Nicolas Steven Conolly Carruthers</td><td>17/03/2026</td><td>Nexus <span class="ntag">Nexus</span></td><td><span class="bdg vol">Voluntário</span></td><td>PERFORMANCE</td><td>JUNIOR</td><td>Saiu</td></tr>
+<tr><td class='nc'>Pedro Henrique Sangaletti Cesar Da Luz</td><td>23/03/2026</td><td>Brasília</td><td><span class="bdg vol">Voluntário</span></td><td>COMPLIANCE</td><td>—</td><td>Saiu</td></tr>
+<tr><td class='nc'>Ana Carolina Felix Martins</td><td>30/03/2026</td><td>Goiânia</td><td><span class="bdg nd">—</span></td><td>—</td><td>JUNIOR</td><td>Dante Araujo</td></tr>
+</tbody>
+    </table>
+  </div></div>
+  <div class="fonte"><b>Total 2025/26:</b> 56 saídas comerciais · Nexus = unidade própria · <b>Fonte:</b> Lista de Usuários 31-03-2026.xlsx</div>
+</div>
+
+<!-- ═══ PDF MODAL ═══ -->
+<div id="pdfModal" class="pdf-modal">
+  <div class="pdf-inner">
+    <div class="pdf-modal-hdr">
+      <h2>📄 Exportar PDF — Reunião Estratégica</h2>
+      <button class="pdf-close" onclick="closePDF()">✕</button>
+    </div>
+    <div class="pdf-modal-actions">
+      <button class="pdf-print-btn" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
+      <div class="pdf-note-txt">Use o diálogo de impressão do navegador e selecione "Salvar como PDF" como destino.</div>
+    </div>
+
+    <!-- PAGE 1: HEADCOUNT -->
+    <div class="pdf-page" id="print-p1">
+      <div class="pdf-hdr">
+        <div class="pdf-hdr-left">
+          <h2>Patrimônio Humano</h2>
+          <p>Objetivo estratégico: Atrair e Reter Talentos &nbsp;·&nbsp; Indicadores: HC Líquido Assessoria Comercial</p>
+        </div>
+        <div class="pdf-logo">VALOR</div>
+      </div>
+      <div class="pdf-obj">
+        <b>Indicadores:</b> HC Líquido Assessoria Comercial — HC líquido projetado para o ano (por mês e por unidade) &nbsp;|&nbsp;
+        <b>Meta ano: 234 AIs comerciais</b>
+      </div>
+      <div class="pdf-body">
+        <div class="pdf-kpis">
+          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Headcount Total</div><div class="pdf-kpi-val">197</div><div class="pdf-kpi-sub">Assessores comerciais ativos</div></div>
+          <div class="pdf-kpi gold"><div class="pdf-kpi-lbl">Meta Março/26</div><div class="pdf-kpi-val" style="color:var(--gold)">212</div><div class="pdf-kpi-sub">Meta de contratação</div></div>
+          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Gap Março</div><div class="pdf-kpi-val" style="color:var(--red)">-15</div><div class="pdf-kpi-sub">Abaixo da meta</div></div>
+        </div>
+        <div class="pdf-section-title">Meta Mar/26 vs Atual por Unidade</div>
+        <div class="pm-legend">
+          <span><span class="pm-leg-dot" style="background:#C4922A;opacity:.5"></span>Meta</span>
+          <span><span class="pm-leg-dot" style="background:var(--green)"></span>Atingido</span>
+          <span><span class="pm-leg-dot" style="background:var(--red)"></span>Abaixo da meta</span>
+        </div>
+        <table style="width:100%;border:none"><tr class="pm-row"><td class="pm-unit">Vitória</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:92%"><span>55</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:88%;background:#9B1C1C"><span>53</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr><tr class="pm-row"><td class="pm-unit">Cachoeiro</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:13%"><span>8</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:10%;background:#9B1C1C"><span>6</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr><tr class="pm-row"><td class="pm-unit">São Paulo</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:55%"><span>33</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:53%;background:#9B1C1C"><span>32</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-1</b></td></tr><tr class="pm-row"><td class="pm-unit">Rio de Janeiro</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:30%"><span>18</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:23%;background:#9B1C1C"><span>14</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-4</b></td></tr><tr class="pm-row"><td class="pm-unit">Brasília</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:50%"><span>30</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:43%;background:#9B1C1C"><span>26</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-4</b></td></tr><tr class="pm-row"><td class="pm-unit">Goiânia</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:15%"><span>9</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:13%;background:#9B1C1C"><span>8</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-1</b></td></tr><tr class="pm-row"><td class="pm-unit">Belo Horizonte</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:38%"><span>23</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:35%;background:#9B1C1C"><span>21</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr><tr class="pm-row"><td class="pm-unit">Brumadinho</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:12%"><span>7</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:13%;background:#1A6B3C"><span>8</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>+1</b></td></tr><tr class="pm-row"><td class="pm-unit">Nexus</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:30%"><span>18</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:30%;background:#1A6B3C"><span>18</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr><tr class="pm-row"><td class="pm-unit">Linhares</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:5%"><span>3</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:5%;background:#1A6B3C"><span>3</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr><tr class="pm-row"><td class="pm-unit">Farmer</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:13%"><span>8</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:13%;background:#1A6B3C"><span>8</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr></table>
+      </div>
+    </div>
+
+    <!-- PAGE 2: SAÍDAS -->
+    <div class="pdf-page" id="print-p2">
+      <div class="pdf-hdr">
+        <div class="pdf-hdr-left">
+          <h2>Patrimônio Humano — Análise de Turnover</h2>
+          <p>Assessoria de Investimentos &nbsp;·&nbsp; Saídas Comerciais 2026</p>
+        </div>
+        <div class="pdf-logo">VALOR</div>
+      </div>
+      <div class="pdf-obj"><b>Indicadores:</b> HC Líquido Assessoria Comercial &nbsp;·&nbsp; <b>Análise Turn Over</b></div>
+      <div class="pdf-body">
+        <div class="pdf-kpis4">
+          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Saídas 2026 YTD</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--red)">11</div><div class="pdf-kpi-sub">Jan–Mar/26</div></div>
+          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Involuntárias 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--red)">6</div><div class="pdf-kpi-sub">55% das classificadas</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Voluntárias 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--green)">4</div><div class="pdf-kpi-sub">36% das classificadas</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Acordo 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--gold)">1</div><div class="pdf-kpi-sub">9% das classificadas</div></div>
+        </div>
+        <div class="pdf-section-title">Motivos de Saída — 2026</div>
+        <div class="pdf-legend">
+          <div class="pdf-leg-item"><div class="pdf-leg-dot" style="background:var(--red)"></div>Involuntário</div>
+          <div class="pdf-leg-item"><div class="pdf-leg-dot" style="background:var(--green)"></div>Voluntário</div>
+          <div class="pdf-leg-item"><div class="pdf-leg-dot" style="background:var(--gold)"></div>Acordo</div>
+        </div>
+        <table style="width:100%;border:none">
+          <tr><td class="mot-label">BAIXA PERF</td><td class="mot-bar"><div class="seg-wrap"><div class="seg sinv" style="width:60%">3</div><div class="seg svol" style="width:20%">1</div><div class="seg sac" style="width:20%">1</div></div></td></tr>
+<tr><td class="mot-label">PESSOAL</td><td class="mot-bar"><div class="seg-wrap"><div class="seg sinv" style="width:40%">2</div><div class="seg svol" style="width:20%">1</div></div></td></tr>
+<tr><td class="mot-label">COMPORTAMENTO</td><td class="mot-bar"><div class="seg-wrap"><div class="seg sinv" style="width:20%">1</div></div></td></tr>
+<tr><td class="mot-label">OUTRA OPORTUNIDADE</td><td class="mot-bar"><div class="seg-wrap"><div class="seg svol" style="width:20%">1</div></div></td></tr>
+<tr><td class="mot-label">COMPLIANCE</td><td class="mot-bar"><div class="seg-wrap"><div class="seg svol" style="width:20%">1</div></div></td></tr>
+
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRINT AREA (shown only on print) ═══ -->
+<div id="print-area">
+  <div class="print-page">{}</div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+const EXT_DATA=[{"Unidade": "Vitória", "Qtd": 13, "PctUnit": 24.5}, {"Unidade": "Brasília", "Qtd": 12, "PctUnit": 46.2}, {"Unidade": "São Paulo", "Qtd": 10, "PctUnit": 31.2}, {"Unidade": "Nexus", "Qtd": 6, "PctUnit": 33.3}, {"Unidade": "Belo Horizonte", "Qtd": 4, "PctUnit": 19.0}, {"Unidade": "Brumadinho", "Qtd": 3, "PctUnit": 37.5}, {"Unidade": "Goiânia", "Qtd": 3, "PctUnit": 37.5}, {"Unidade": "Rio de Janeiro", "Qtd": 3, "PctUnit": 21.4}, {"Unidade": "Linhares", "Qtd": 2, "PctUnit": 66.7}, {"Unidade": "Cachoeiro", "Qtd": 2, "PctUnit": 33.3}];
+
+/* HC VALOR TOTAL */
+const HCV_LABS = ['Abr/25','Mai/25','Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26'];
+const HCV_TOTAL = [304,305,304,305,310,304,307,303,300,293,296,293];
+const HCV_COMERCIAL = [230,231,230,229,229,225,226,224,221,217,220,216];
+const HCV_SUPORTE = [29,29,29,31,35,34,34,32,32,31,31,32];
+const HCV_PRODUTOS = [23,23,23,23,24,24,25,25,25,23,23,22];
+const HCV_WEALTH = [9,9,9,8,7,7,8,8,8,8,8,8];
+const HCV_SEGURIDADE = [13,13,13,14,14,13,13,13,13,13,13,13];
+const HCV_PIE_LABS = ['Comercial','Suporte ao Negócio','Produtos','Seguridade e Empresas','Wealth','Outros'];
+const HCV_PIE_VALS = [216,32,22,13,8,2];
+
+function go(name,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+name).classList.add('on');
+  btn.classList.add('on');
+  if(!window._ci) window._ci={};
+  if(!window._ci[name]){ window._ci[name]=1; buildCharts(name); }
+}
+function openPDF(){
+  document.getElementById('pdfModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePDF(){
+  document.getElementById('pdfModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('pdfModal').addEventListener('click',function(e){
+  if(e.target===this) closePDF();
+});
+
+function ft(){
+  const u=document.getElementById('fUnit').value.toLowerCase();
+  const a=document.getElementById('fAno').value;
+  const c=document.getElementById('fCls').value.toLowerCase();
+  let n=0;
+  document.querySelectorAll('#dt tbody tr').forEach(tr=>{
+    const td=tr.querySelectorAll('td');
+    const ru=td[2].textContent.toLowerCase();
+    const ra=td[1].textContent.split('/')[2]||'';
+    const rc=td[3].textContent.toLowerCase();
+    const ok=(!u||ru.includes(u))&&(!a||ra===a)&&(!c||rc.includes(c));
+    tr.style.display=ok?'':'none'; if(ok) n++;
+  });
+  document.getElementById('cntLbl').textContent=n+' registros';
+}
+document.addEventListener('DOMContentLoaded',()=>{ft();buildCharts('overview');});
+
+if(window.ChartDataLabels){Chart.register(ChartDataLabels);}
+const DL_DEFAULT={color:'#1B3A6B',font:{size:10,weight:'bold'},formatter:v=>(v==null||v===0)?'':v};
+
+const NAVY='#1B3A6B',NAVY2='#2D6A9F',GOLD='#C4922A',ORANGE='#E87722';
+const TEAL='#0B6E8C',RED='#9B1C1C',GREEN='#1A6B3C',PURPLE='#5B21B6';
+
+const UNITS     =["Vitória", "São Paulo", "Brasília", "Belo Horizonte", "Nexus", "Rio de Janeiro", "Brumadinho", "Goiânia", "Farmer", "Cachoeiro", "Linhares"];
+const HC_VALS   =[53, 32, 26, 21, 18, 14, 8, 8, 8, 6, 3];
+const NIVEL_LABS=["Júnior", "Pleno", "Digital/Nexus", "Master", "Sênior I", "Líder", "Part-Time", "Investor", "Líder Full", "Formação", "Gestor", "Sênior II"];
+const NIVEL_VALS=[63, 45, 18, 14, 13, 12, 9, 8, 5, 4, 4, 2];
+const EA_LABS   =[2020, 2021, 2022, 2023, 2024, 2025, 2026];
+const EA_VALS   =[7, 23, 67, 71, 50, 47, 11];
+const EU_LABS   =["Vitória", "São Paulo", "Brasília", "Rio de Janeiro", "Belo Horizonte", "Nexus", "Goiânia", "Brumadinho", "Cachoeiro", "Assessoria PJ", "Private e Farmer"];
+const EU_VALS   =[65, 57, 48, 25, 23, 22, 19, 5, 4, 2, 2];
+const MOTIV_L   =["OUTRA OPORTUNIDADE", "BAIXA PERF", "PERFORMANCE", "PESSOAL", "CONC ESCRITORIO", "CULTURA", "INCOMPATIBILIDADE", "OUTROS"];
+const MOTIV_V   =[13, 11, 9, 8, 4, 3, 3, 3];
+const NEL       =["JUNIOR", "PLENO", "SENIOR I", "SENIOR II", "EXTERNO", "TRAINEE", "FARMER", "DIGITAL", "BACKOFFICE", "ESTAGIARIO(A)", "BROKER", "MASTER", "LIDER"];
+const NEV       =[90, 53, 13, 7, 6, 6, 4, 4, 3, 1, 1, 1, 1];
+const ADM_L     =[2008, 2011, 2012, 2014, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+const ADM_V     =[1, 1, 1, 1, 1, 4, 13, 18, 10, 23, 40, 24, 29, 28, 3];
+const META_U    =["Vitória", "Cachoeiro", "São Paulo", "Rio de Janeiro", "Brasília", "Goiânia", "Belo Horizonte", "Brumadinho", "Nexus", "Linhares", "Farmer"];
+const META_TGT  =[55, 8, 33, 18, 30, 9, 23, 7, 18, 3, 8];
+const META_ACT  =[53, 6, 32, 14, 26, 8, 21, 8, 18, 3, 8];
+const STK_U     =["Brasília", "Goiânia", "Rio de Janeiro", "Nexus", "São Paulo", "Belo Horizonte", "Cachoeiro", "Vitória"];
+const STK_VOL   =[0, 0, 0, 0, 0, 1, 0, 1];
+const STK_INV   =[3, 1, 1, 1, 1, 0, 0, 0];
+const STK_AC    =[0, 0, 0, 0, 0, 0, 1, 0];
+const DIAS_VALS =[274, 2394, 215, 1893, 370, 655, 464, 1243, 1430, 180, 1172];
+const DIAS_NAMES=["PEDRO TEIXEIRA BRANDAO", "PEDRO HENRIQUE SANGALETTI CESAR DA LUZ", "MARIA EDUARDA HUTTER", "BEATRIZ SILVA DE ARAUJO", "NICOLAS STEVEN CONOLLY CARRUTHERS", "ARTHUR DUARTE WINGLER", "JULIA MACHADO CHAGAS", "LARISSA ALMEIDA GERALDINI", "CASSIO RIBEIRO CORREA", "ANA CAROLINA FELIX MARTINS", "BERNARDO FIGUEIREDO SAVOI"];
+
+const defs={responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{},datalabels:{...DL_DEFAULT,anchor:'end',align:'end'}}};
+const scaleY={grid:{color:'#EDE8DC'},ticks:{font:{size:10}}};
+const scaleX={grid:{display:false},ticks:{font:{size:10}}};
+
+function hbar(id,labs,data,color,opts={}){
+  const ctx=document.getElementById(id); if(!ctx||ctx._c) return;
+  ctx._c=new Chart(ctx,{type:'bar',data:{labels:labs,datasets:[{data,backgroundColor:color,borderRadius:4,borderSkipped:false}]},
+    options:{...defs,...opts,indexAxis:'y',
+      layout:{padding:{right:36}},
+      plugins:{...defs.plugins,...(opts.plugins||{}),datalabels:{...DL_DEFAULT,anchor:'end',align:'end'}},
+      scales:{x:scaleY,y:{grid:{display:false},ticks:{font:{size:10},maxRotation:0}}}
+    }});
+}
+function vbar(id,labs,data,color,opts={}){
+  const ctx=document.getElementById(id); if(!ctx||ctx._c) return;
+  ctx._c=new Chart(ctx,{type:'bar',data:{labels:labs,datasets:[{data,backgroundColor:color,borderRadius:4,borderSkipped:false}]},
+    options:{...defs,...opts,
+      layout:{padding:{top:18}},
+      plugins:{...defs.plugins,...(opts.plugins||{}),datalabels:{...DL_DEFAULT,anchor:'end',align:'end'}},
+      scales:{x:scaleX,y:scaleY}}
+  });
+}
+function stacked(id,labs,ds,opts={}){
+  const ctx=document.getElementById(id); if(!ctx||ctx._c) return;
+  ctx._c=new Chart(ctx,{type:'bar',data:{labels:labs,datasets:ds},
+    options:{...defs,...opts,indexAxis:'y',
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:12}},tooltip:{},
+        datalabels:{color:'#fff',font:{size:9,weight:'bold'},formatter:v=>(!v||v===0)?'':v,anchor:'center',align:'center'}},
+      scales:{x:{...scaleY,stacked:true},y:{grid:{display:false},ticks:{font:{size:10},maxRotation:0},stacked:true}}
+    }});
+}
+
+function buildCharts(tab){
+  if(tab==='overview'){
+    hbar('cHcUnit',UNITS,HC_VALS,NAVY);
+    stacked('cExitStack',STK_U,[
+      {label:'Voluntário',data:STK_VOL,backgroundColor:GREEN,borderRadius:2},
+      {label:'Involuntário',data:STK_INV,backgroundColor:RED,borderRadius:2},
+      {label:'Acordo',data:STK_AC,backgroundColor:GOLD,borderRadius:2},
+    ]);
+    const ctx=document.getElementById('cMeta'); if(ctx&&!ctx._c)
+      ctx._c=new Chart(ctx,{type:'bar',
+        data:{labels:META_U,datasets:[
+          {label:'Meta Mar/26',data:META_TGT,backgroundColor:'rgba(196,146,42,.35)',borderColor:GOLD,borderWidth:1.5,borderRadius:4},
+          {label:'Atual Mar/26',data:META_ACT,backgroundColor:META_ACT.map((v,i)=>v>=META_TGT[i]?'rgba(26,107,60,.7)':'rgba(155,28,28,.7)'),borderRadius:4},
+        ]},
+        options:{...defs,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:12}},tooltip:{}},scales:{x:scaleX,y:scaleY}}
+      });
+    vbar('cExitsYear',EA_LABS.map(String),EA_VALS,EA_VALS.map((_,i)=>(EA_LABS[i]===2025||EA_LABS[i]===2026)?RED:'#BFAC8A'));
+  }
+  if(tab==='headcount'){
+    vbar('cAdm',ADM_L.map(String),ADM_V,ADM_L.map(y=>y>=2024?GREEN:NAVY2));
+  }
+  if(tab==='metas'){
+    const ctx=document.getElementById('cMetaBar'); if(ctx&&!ctx._c)
+      ctx._c=new Chart(ctx,{type:'bar',
+        data:{labels:META_U,datasets:[
+          {label:'Meta Mar/26',data:META_TGT,backgroundColor:'rgba(196,146,42,.3)',borderColor:GOLD,borderWidth:2,borderRadius:4},
+          {label:'Atual Mar/26',data:META_ACT,backgroundColor:META_ACT.map((v,i)=>v>=META_TGT[i]?'rgba(26,107,60,.75)':'rgba(155,28,28,.75)'),borderRadius:4},
+        ]},
+        options:{...defs,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:14}},tooltip:{}},scales:{x:scaleX,y:{...scaleY,suggestedMin:0}}}
+      });
+  }
+  if(tab==='saidas'){
+    stacked('cStackSaidas',STK_U,[
+      {label:'Voluntário',data:STK_VOL,backgroundColor:GREEN,borderRadius:2},
+      {label:'Involuntário',data:STK_INV,backgroundColor:RED,borderRadius:2},
+      {label:'Acordo',data:STK_AC,backgroundColor:GOLD,borderRadius:2},
+    ]);
+    vbar('cExitsYearDetail',EA_LABS.map(String),EA_VALS,EA_VALS.map((_,i)=>(EA_LABS[i]===2025||EA_LABS[i]===2026)?RED:'#BFAC8A'));
+    hbar('cMotivo',MOTIV_L,MOTIV_V,PURPLE);
+    hbar('cNivelExits',NEL,NEV,TEAL);
+  }
+  if(tab==='retencao'){
+    const ctx=document.getElementById('cDias'); if(ctx&&!ctx._c)
+      ctx._c=new Chart(ctx,{type:'bar',
+        data:{labels:DIAS_NAMES.map(n=>n.split(' ').slice(0,2).join(' ')),
+               datasets:[{data:DIAS_VALS,backgroundColor:DIAS_VALS.map(v=>v>=180?'rgba(26,107,60,.7)':'rgba(155,28,28,.7)'),borderRadius:4}]},
+        options:{...defs,scales:{x:scaleX,y:{...scaleY,title:{display:true,text:'Dias de Casa',font:{size:10}}}}}
+      });
+  }
+  if(tab==='ext' && EXT_DATA.length>0){
+    const ctx=document.getElementById('cExtUnit'); if(ctx&&!ctx._c)
+      ctx._c=new Chart(ctx,{type:'bar',
+        data:{labels:EXT_DATA.map(d=>d.Unidade),datasets:[{label:'% do time',data:EXT_DATA.map(d=>d.PctUnit),backgroundColor:GOLD,borderRadius:4}]},
+        options:{...defs,plugins:{legend:{display:false},tooltip:{}},scales:{x:scaleX,y:{...scaleY,title:{display:true,text:'% da unidade',font:{size:10}}}}}
+      });
+  }
+  if(tab==='hcvalor'){
+    /* Linha de evolução total */
+    const c1=document.getElementById('cHcValorLine'); if(c1&&!c1._c)
+      c1._c=new Chart(c1,{type:'line',
+        data:{labels:HCV_LABS,datasets:[{label:'HC Total',data:HCV_TOTAL,borderColor:NAVY,backgroundColor:'rgba(27,58,107,.1)',
+              fill:true,tension:.3,pointRadius:4,pointBackgroundColor:NAVY,borderWidth:2.5}]},
+        options:{...defs,plugins:{...defs.plugins,datalabels:{...DL_DEFAULT,anchor:'end',align:'top'}},
+          scales:{x:scaleX,y:{...scaleY,suggestedMin:280,suggestedMax:320}}}
+      });
+    /* Pizza composição */
+    const c2=document.getElementById('cHcValorPie'); if(c2&&!c2._c)
+      c2._c=new Chart(c2,{type:'doughnut',
+        data:{labels:HCV_PIE_LABS,datasets:[{data:HCV_PIE_VALS,
+              backgroundColor:[NAVY,TEAL,PURPLE,ORANGE,GREEN,'#BFAC8A'],borderWidth:2,borderColor:'#fff'}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:true,position:'right',labels:{font:{size:10},boxWidth:12}},tooltip:{},
+            datalabels:{color:'#fff',font:{size:11,weight:'bold'},formatter:(v,ctx)=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);const p=Math.round(v/t*100);return p>=3?p+'%':'';}}}}
+      });
+    /* Stacked por área */
+    const c3=document.getElementById('cHcValorStack'); if(c3&&!c3._c)
+      c3._c=new Chart(c3,{type:'bar',
+        data:{labels:HCV_LABS,datasets:[
+          {label:'Comercial',data:HCV_COMERCIAL,backgroundColor:NAVY,borderRadius:2},
+          {label:'Suporte ao Negócio',data:HCV_SUPORTE,backgroundColor:TEAL,borderRadius:2},
+          {label:'Produtos',data:HCV_PRODUTOS,backgroundColor:PURPLE,borderRadius:2},
+          {label:'Seguridade e Empresas',data:HCV_SEGURIDADE,backgroundColor:ORANGE,borderRadius:2},
+          {label:'Wealth',data:HCV_WEALTH,backgroundColor:GREEN,borderRadius:2},
+        ]},
+        options:{...defs,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:12}},tooltip:{},datalabels:{display:false}},
+          scales:{x:scaleX,y:{...scaleY,stacked:true}},datasets:{bar:{stacked:true}}}
+      });
+  }
+}
+</script>
+<script>
+(function(){
+  const fc={apiKey:"AIzaSyAxwiOiVXgBNPGWTSOAl9p_BqKgtb9yZFc",authDomain:"crm-regua.firebaseapp.com",
+    databaseURL:"https://crm-regua-default-rtdb.firebaseio.com",projectId:"crm-regua",
+    storageBucket:"crm-regua.firebasestorage.app",messagingSenderId:"333904372979",
+    appId:"1:333904372979:web:39b4c21b71f54f8c9c8386"};
+  if(!firebase.apps.length) firebase.initializeApp(fc);
+  document.body.style.opacity='0';
+  firebase.auth().onAuthStateChanged(u=>{
+    if(!u){window.location.href='login.html';return;}
+    document.body.style.opacity='1';
+  });
+})();
+</script>
+</body>
+</html>

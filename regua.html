@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM · Régua de Relacionamento</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+#app{display:flex;min-height:100vh}
+.loading-screen{position:fixed;inset:0;background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px}
+.loading-screen h2{color:#fff;font-size:18px}
+.loading-screen p{color:#8888aa;font-size:13px}
+.spinner{width:40px;height:40px;border:3px solid #2d2d4e;border-top-color:#e8a000;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#27ae60;display:inline-block;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sidebar{width:220px;background:#1a1a2e;color:#fff;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:22px 20px 14px;border-bottom:1px solid #2d2d4e}
+.sidebar-logo h2{font-size:14px;font-weight:700;color:#fff;line-height:1.3}
+.sidebar-logo p{font-size:11px;color:#8888aa;margin-top:3px}
+.portal-btn{display:inline-flex;align-items:center;gap:5px;color:#8888aa;text-decoration:none;font-size:11px;margin-top:10px;padding:4px 10px;border:1px solid #2d2d4e;border-radius:14px;transition:.15s}
+.portal-btn:hover{color:#e8a000;border-color:#e8a000}
+.sidebar-nav{flex:1;padding:10px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13px;color:#b0b0cc;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:#2d2d4e;color:#fff}
+.nav-item.active{background:#2d2d4e;color:#fff;border-left-color:#e8a000}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+.notif-dot{display:inline-block;background:#c0392b;color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;margin-left:auto}
+.sidebar-footer{padding:14px 20px;border-top:1px solid #2d2d4e;font-size:11px;color:#5555aa}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.topbar-title{font-size:15px;font-weight:700}
+.bp-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.bp-tab{padding:5px 13px;border-radius:20px;border:1px solid #ddd;font-size:12px;cursor:pointer;background:#fff;transition:all .15s}
+.bp-tab:hover{border-color:#e8a000;color:#e8a000}
+.bp-tab.active{background:#e8a000;border-color:#e8a000;color:#fff;font-weight:700}
+.bp-alerta{display:inline-block;background:#c0392b;color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:0 4px;margin-left:4px;vertical-align:middle}
+.content{flex:1;overflow-y:auto;padding:20px}
+/* Cards */
+.cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.card-value{font-size:26px;font-weight:700;margin-top:3px}
+.card-sub{font-size:11px;color:#aaa;margin-top:1px}
+.card.urgent .card-value{color:#c0392b}
+.card.overdue .card-value{color:#e67e22}
+.card.ok .card-value{color:#27ae60}
+.card.total .card-value{color:#2980b9}
+/* Meta Mensal */
+.meta-box{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:20px;margin-bottom:20px}
+.meta-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.meta-left{flex:1;min-width:180px}
+.meta-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.meta-subtitle{font-size:11px;color:#888;margin-bottom:14px}
+.meta-pct-wrap{display:flex;align-items:flex-end;gap:8px;margin-bottom:8px}
+.meta-pct{font-size:52px;font-weight:800;line-height:1}
+.meta-pct-label{font-size:13px;color:#888;margin-bottom:8px}
+.meta-bar{height:10px;background:#eee;border-radius:5px;overflow:hidden;margin-bottom:6px}
+.meta-bar-fill{height:100%;border-radius:5px;transition:width .6s}
+.meta-counts{font-size:11px;color:#888}
+.meta-counts b{color:#333;font-weight:700}
+.c-ok{color:#27ae60} .c-med{color:#e67e22} .c-low{color:#c0392b}
+.f-ok{background:linear-gradient(90deg,#27ae60,#2ecc71)}
+.f-med{background:linear-gradient(90deg,#e67e22,#f39c12)}
+.f-low{background:linear-gradient(90deg,#c0392b,#e74c3c)}
+/* BP cards na meta */
+.meta-bps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0}
+.meta-bp{background:#f8f9fa;border-radius:8px;padding:14px}
+.meta-bp-name{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px}
+.meta-bp-pct{font-size:28px;font-weight:800;line-height:1;margin-bottom:6px}
+.meta-bp-bar{height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;margin-bottom:5px}
+.meta-bp-fill{height:100%;border-radius:3px}
+.meta-bp-counts{font-size:10px;color:#888}
+/* Histórico */
+.meta-hist{margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0}
+.meta-hist-title{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.meta-hist-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.meta-hist-mes{width:75px;font-size:12px;color:#555;font-weight:600}
+.meta-hist-bar{flex:1;height:7px;background:#eee;border-radius:4px;overflow:hidden}
+.meta-hist-fill{height:100%;border-radius:4px}
+.meta-hist-pct{width:36px;text-align:right;font-size:11px;font-weight:700}
+.meta-hist-cnt{font-size:10px;color:#aaa;width:55px}
+/* Section / Table */
+.section-card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:20px}
+.section-header{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.section-title{font-size:13px;font-weight:700}
+.filters{display:flex;gap:7px;flex-wrap:wrap}
+select,input[type=text],input[type=date],textarea{border:1px solid #ddd;border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit;outline:none;transition:border .15s;background:#fff}
+select:focus,input:focus,textarea:focus{border-color:#e8a000}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f8f9fa;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#666;padding:9px 12px;text-align:left;border-bottom:1px solid #eee;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+tr:hover td{background:#fafafa}
+.nome-cell{font-weight:600;font-size:12px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.bp-badge{background:#eee;color:#555}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.s-urgente{background:#fde8e8;color:#c0392b}
+.s-vencido{background:#fef3e2;color:#e67e22}
+.s-emdia{background:#e8f8f0;color:#27ae60}
+.cargo-gestor{color:#8e44ad;font-weight:600;font-size:12px}
+.cargo-lider{color:#2980b9;font-weight:600;font-size:12px}
+.cargo-assessor{color:#555;font-size:12px}
+.u-bhz{background:#e8f4fd;color:#1a6fa0} .u-rjo{background:#fef0e8;color:#c0562b} .u-bru{background:#e8fdf0;color:#1a8040}
+.u-sp{background:#f0e8fd;color:#6a1aad} .u-bsb{background:#fde8f5;color:#b01a7a} .u-gyn{background:#fdfae8;color:#9a7a00}
+.u-vix{background:#e8fdfa;color:#1a9080} .u-nex{background:#f5e8fd;color:#7a1ab0} .u-lin{background:#fde8e8;color:#b01a1a} .u-cac{background:#e8f0fd;color:#1a3ab0}
+.btn{padding:6px 13px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;transition:all .15s}
+.btn-primary{background:#e8a000;color:#fff} .btn-primary:hover{background:#c98900} .btn-primary:disabled{background:#ccc;cursor:not-allowed}
+.btn-sm{padding:3px 9px;font-size:11px} .btn-ghost{background:transparent;border:1px solid #ddd;color:#555} .btn-ghost:hover{background:#f5f5f5}
+.progress-wrap{display:flex;align-items:center;gap:6px}
+.progress-bar{flex:1;height:5px;background:#eee;border-radius:3px;overflow:hidden;min-width:50px}
+.progress-fill{height:100%;border-radius:3px;background:#27ae60;transition:width .3s}
+.progress-fill.warn{background:#e67e22} .progress-fill.danger{background:#c0392b}
+.progress-pct{font-size:10px;font-weight:700;color:#666;min-width:28px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:18px}
+.form-grid.cols3{grid-template-columns:repeat(3,1fr)}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.3px}
+.form-group.full{grid-column:1/-1}
+.form-actions{padding:0 18px 18px;display:flex;gap:8px}
+.alert{padding:10px 14px;border-radius:8px;font-size:12px;margin:14px 18px 0}
+.alert-success{background:#e8f8f0;color:#1a6a3a;border:1px solid #b0dfbf}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-header{padding:18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1}
+.modal-header h3{font-size:14px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#888;line-height:1}
+.modal-body{padding:18px}
+.hist-item{padding:10px 13px;border-left:3px solid #e8a000;background:#fffdf5;border-radius:0 6px 6px 0;margin-bottom:8px}
+.hist-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hist-nome{font-weight:700;font-size:12px}
+.hist-date{font-size:10px;color:#888;white-space:nowrap}
+.hist-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.hist-tag{background:#f0f0f0;color:#555;font-size:10px;padding:1px 6px;border-radius:4px}
+.hist-comment{font-size:11px;color:#555;margin-top:5px;font-style:italic}
+.empty{text-align:center;padding:32px;color:#aaa;font-size:13px}
+.risco-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#c0392b;margin-right:4px;vertical-align:middle}
+.count-info{font-size:11px;color:#888}
+.notif-panel{background:#1a1a2e;color:#fff;border-radius:10px;padding:16px;margin-bottom:20px}
+.notif-panel-title{font-size:12px;font-weight:700;color:#e8a000;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.notif-item{display:flex;align-items:center;padding:7px 10px;background:#2d2d4e;border-radius:6px;margin-bottom:6px;font-size:11px;gap:8px}
+.notif-item-nome{font-weight:600;flex:1}
+.notif-item-days{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700}
+.days-urgente{background:#fde8e8;color:#c0392b} .days-vencido{background:#fef3e2;color:#e67e22}
+@media(max-width:900px){.cards-row{grid-template-columns:repeat(2,1fr)}.form-grid.cols3{grid-template-columns:repeat(2,1fr)}.meta-bps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div v-if="loading" class="loading-screen">
+    <div class="spinner"></div>
+    <h2>Carregando CRM...</h2>
+    <p>Conectando ao banco de dados</p>
+  </div>
+
+  <template v-else>
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2>Régua de<br>Relacionamento</h2>
+      <p>Comercial · {{ anoAtual }}</p>
+      <a href="index.html" class="portal-btn">&larr; Portal</a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item" :class="{active:view==='dashboard'}" @click="view='dashboard'">
+        <span class="nav-icon">📊</span> Dashboard
+        <span v-if="totalAlerta>0" class="notif-dot">{{ totalAlerta }}</span>
+      </div>
+      <div class="nav-item" :class="{active:view==='contatos'}" @click="view='contatos'">
+        <span class="nav-icon">👥</span> Contatos
+      </div>
+      <div class="nav-item" :class="{active:view==='registrar'}" @click="view='registrar'">
+        <span class="nav-icon">✏️</span> Registrar Contato
+      </div>
+      <div class="nav-item" :class="{active:view==='historico'}" @click="view='historico'">
+        <span class="nav-icon">📋</span> Histórico
+      </div>
+    </nav>
+    <div class="sidebar-footer"><span class="sync-dot"></span>Sincronizado · {{ today }}</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">{{ viewTitle }}</div>
+      <div class="bp-tabs">
+        <div v-for="bp in ['Todos','Gabi','Marina','Sara']" :key="bp"
+             class="bp-tab" :class="{active:bpFiltro===bp}" @click="bpFiltro=bp">
+          {{ bp }}
+          <span v-if="bp!=='Todos' && alertasPorBP[bp]>0" class="bp-alerta">{{ alertasPorBP[bp] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div v-if="view==='dashboard'">
+
+        <!-- ── META MENSAL ── -->
+        <div class="meta-box">
+          <div class="meta-top">
+            <div class="meta-left">
+              <div class="meta-title">🎯 Meta de Contatos — {{ nomesMeses[mesAtual] }} {{ anoAtual }}</div>
+              <div class="meta-subtitle">{{ bpFiltro==='Todos' ? 'Todas as BPs' : bpFiltro }}</div>
+              <div class="meta-pct-wrap">
+                <div class="meta-pct" :class="pctCor(metaMesAtual.pct)">{{ metaMesAtual.pct }}%</div>
+                <div class="meta-pct-label">de alcance</div>
+              </div>
+              <div class="meta-bar">
+                <div class="meta-bar-fill" :class="pctFill(metaMesAtual.pct)"
+                     :style="{width:metaMesAtual.pct+'%'}"></div>
+              </div>
+              <div class="meta-counts">
+                <b>{{ metaMesAtual.realizados }}</b> realizados de <b>{{ metaMesAtual.planejados }}</b> planejados
+              </div>
+            </div>
+          </div>
+
+          <!-- Breakdown por BP (só quando "Todos") -->
+          <div v-if="bpFiltro==='Todos'" class="meta-bps">
+            <div v-for="bp in ['Gabi','Marina','Sara']" :key="bp" class="meta-bp">
+              <div class="meta-bp-name">{{ bp }}</div>
+              <div class="meta-bp-pct" :class="pctCor(metaBP[bp].pct)">{{ metaBP[bp].pct }}%</div>
+              <div class="meta-bp-bar">
+                <div class="meta-bp-fill" :class="pctFill(metaBP[bp].pct)"
+                     :style="{width:metaBP[bp].pct+'%'}"></div>
+              </div>
+              <div class="meta-bp-counts">{{ metaBP[bp].realizados }}/{{ metaBP[bp].planejados }} planejados</div>
+            </div>
+          </div>
+
+          <!-- Histórico do semestre -->
+          <div v-if="historicoMetas.length > 1" class="meta-hist">
+            <div class="meta-hist-title">Histórico do Semestre</div>
+            <div v-for="m in historicoMetas" :key="m.mes" class="meta-hist-row">
+              <div class="meta-hist-mes">{{ m.nome }}</div>
+              <div class="meta-hist-bar">
+                <div class="meta-hist-fill" :class="pctFill(m.pct)"
+                     :style="{width:m.pct+'%',height:'100%',borderRadius:'4px'}"></div>
+              </div>
+              <div class="meta-hist-pct" :class="pctCor(m.pct)">{{ m.pct }}%</div>
+              <div class="meta-hist-cnt">{{ m.realizados }}/{{ m.planejados }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards status -->
+        <div class="cards-row">
+          <div class="card total"><div class="card-label">Total</div><div class="card-value">{{ stats.total }}</div><div class="card-sub">{{ bpFiltro==='Todos'?'todas as BPs':bpFiltro }}</div></div>
+          <div class="card ok"><div class="card-label">Em Dia</div><div class="card-value">{{ stats.emDia }}</div><div class="card-sub">no prazo</div></div>
+          <div class="card overdue"><div class="card-label">Vencidos</div><div class="card-value">{{ stats.vencido }}</div><div class="card-sub">prazo ultrapassado</div></div>
+          <div class="card urgent"><div class="card-label">Urgente</div><div class="card-value">{{ stats.urgente }}</div><div class="card-sub">nunca contatados</div></div>
+        </div>
+
+        <!-- Progresso por unidade -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+          <div v-for="bp in ['Gabi','Marina','Sara']" :key="bp" class="card"
+               v-show="bpFiltro==='Todos'||bpFiltro===bp">
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px">{{ bp }}</div>
+            <div v-for="un in unidadesPorBP[bp]" :key="un" style="margin-bottom:9px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+                <span :class="'badge u-'+uCls(un)">{{ un }}</span>
+                <span class="count-info">{{ statsPorUnidade[un]?.emDia||0 }}/{{ statsPorUnidade[un]?.total||0 }}</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" :class="pProgClass(statsPorUnidade[un])" :style="{width:pProgPct(statsPorUnidade[un])+'%'}"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alertas -->
+        <div class="notif-panel" v-if="contatosAlerta.length">
+          <div class="notif-panel-title">
+            🔔 Contatos que precisam de atenção agora
+            <span style="margin-left:auto;font-size:10px;color:#8888aa">{{ contatosAlerta.length }} pessoas</span>
+          </div>
+          <div v-for="c in contatosAlerta.slice(0,8)" :key="c.id" class="notif-item">
+            <span v-if="c.risco" class="risco-dot"></span>
+            <span class="notif-item-nome">{{ c.nome }}</span>
+            <span :class="'badge u-'+uCls(c.unidade)" style="margin:0 4px">{{ c.unidade }}</span>
+            <span class="badge bp-badge">{{ c.bp }}</span>
+            <span :class="'notif-item-days '+(c.status==='URGENTE'?'days-urgente':'days-vencido')" style="margin:0 6px">
+              {{ c.status==='URGENTE'?'Sem contato':diasAtraso(c)+'d atraso' }}
+            </span>
+            <button class="btn btn-primary btn-sm" @click="abrirRegistro(c)">+ Registrar</button>
+          </div>
+          <div v-if="contatosAlerta.length>8" style="font-size:10px;color:#8888aa;text-align:center;margin-top:6px">
+            + {{ contatosAlerta.length-8 }} outros — veja em Contatos
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">⚠️ Urgentes e Vencidos</div>
+            <span class="count-info">{{ contatosAlerta.length }} contatos</span>
+          </div>
+          <div class="table-wrap">
+            <table v-if="contatosAlerta.length">
+              <thead><tr><th>Nome</th><th>Unidade</th><th>BP</th><th>Cargo</th><th>Último Contato</th><th>Atraso</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr v-for="c in contatosAlerta" :key="c.id">
+                  <td><div class="nome-cell"><span v-if="c.risco" class="risco-dot"></span>{{ c.nome }}</div></td>
+                  <td><span :class="'badge u-'+uCls(c.unidade)">{{ c.unidade }}</span></td>
+                  <td><span class="badge bp-badge">{{ c.bp }}</span></td>
+                  <td :class="cargoCls(c.cargo)">{{ c.cargo||'—' }}</td>
+                  <td>{{ c.ultimoContato?fmtDate(c.ultimoContato):'—' }}</td>
+                  <td style="color:#c0392b;font-weight:700;font-size:11px">{{ c.status==='URGENTE'?'Sem contato':diasAtraso(c)+'d' }}</td>
+                  <td><span :class="'status-badge s-'+c.status.toLowerCase()">{{ c.status }}</span></td>
+                  <td><button class="btn btn-primary btn-sm" @click="abrirRegistro(c)">Registrar</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="empty">Todos em dia! 🎉</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTATOS -->
+      <div v-if="view==='contatos'">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Time Comercial</div>
+            <div class="filters">
+              <select v-model="filtroUnidade" style="width:130px">
+                <option value="">Todas as unidades</option>
+                <option v-for="u in todasUnidades" :key="u" :value="u">{{ u }}</option>
+              </select>
+              <select v-model="filtroCargo" style="width:140px">
+                <option value="">Todos os cargos</option>
+                <option>Gestor de Unidade</option><option>Líder de Equipe</option><option>Assessor</option>
+              </select>
+              <select v-model="filtroStatus" style="width:120px">
+                <option value="">Todos os status</option>
+                <option>URGENTE</option><option>VENCIDO</option><option>EM DIA</option>
+              </select>
+              <input type="text" v-model="busca" placeholder="🔍 Buscar nome..." style="width:160px">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>Unidade</th><th>BP</th><th>Cargo</th><th>Último Contato</th><th>Próximo</th><th>Status</th><th>Progresso Sem.</th><th></th></tr></thead>
+              <tbody>
+                <tr v-for="c in contatosFiltrados" :key="c.id">
+                  <td><div class="nome-cell"><span v-if="c.risco" class="risco-dot" title="Risco"></span>{{ c.nome }}</div></td>
+                  <td><span :class="'badge u-'+uCls(c.unidade)">{{ c.unidade }}</span></td>
+                  <td><span class="badge bp-badge">{{ c.bp }}</span></td>
+                  <td :class="cargoCls(c.cargo)">{{ c.cargo||'—' }}</td>
+                  <td style="font-size:11px">{{ c.ultimoContato?fmtDate(c.ultimoContato):'—' }}</td>
+                  <td style="font-size:11px" :style="{color:c.status==='VENCIDO'?'#e67e22':c.status==='URGENTE'?'#c0392b':''}">{{ c.proximoContato?fmtDate(c.proximoContato):'—' }}</td>
+                  <td><span :class="'status-badge s-'+c.status.toLowerCase()">{{ c.status }}</span></td>
+                  <td>
+                    <div class="progress-wrap">
+                      <div class="progress-bar"><div class="progress-fill" :class="c.progressoSem<0.5?'danger':c.progressoSem<1?'warn':''" :style="{width:Math.min(c.progressoSem*100,100)+'%'}"></div></div>
+                      <span class="progress-pct">{{ c.qtdSem }}/{{ c.metaSem }}</span>
+                    </div>
+                  </td>
+                  <td style="white-space:nowrap">
+                    <button class="btn btn-primary btn-sm" @click="abrirRegistro(c)">+ Contato</button>
+                    <button class="btn btn-ghost btn-sm" style="margin-left:4px" @click="verHistorico(c)">📋</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-if="!contatosFiltrados.length" class="empty">Nenhum contato encontrado.</div>
+          </div>
+          <div style="padding:10px 18px;font-size:11px;color:#888;border-top:1px solid #f0f0f0">{{ contatosFiltrados.length }} de {{ contatosFiltradosPorBP.length }} contatos</div>
+        </div>
+      </div>
+
+      <!-- REGISTRAR CONTATO -->
+      <div v-if="view==='registrar'">
+        <div class="section-card" style="max-width:680px">
+          <div class="section-header"><div class="section-title">✏️ Registrar Novo Contato</div></div>
+          <div v-if="registroSucesso" class="alert alert-success">✅ Contato registrado e sincronizado!</div>
+          <div v-if="salvando" class="alert" style="background:#fdfae8;color:#7a6000;border:1px solid #e0cc80;margin:14px 18px 0">⏳ Salvando...</div>
+          <div class="form-grid cols3">
+            <div class="form-group full">
+              <label>Pessoa *</label>
+              <select v-model="form.contatoId" style="width:100%">
+                <option value="">Selecione a pessoa...</option>
+                <optgroup v-for="un in unidadesFiltradas" :key="un" :label="un">
+                  <option v-for="c in contatosPorUnidade(un)" :key="c.id" :value="c.id">{{ c.nome }} · {{ c.cargo }}</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group"><label>Data do Contato *</label><input type="date" v-model="form.data" :max="hoje"></div>
+            <div class="form-group"><label>Canal</label>
+              <select v-model="form.canal"><option value="">—</option><option>WhatsApp</option><option>Presencial</option><option>Reunião</option><option>Ligação</option><option>E-mail</option><option>Teams</option></select>
+            </div>
+            <div class="form-group"><label>Tipo de Interação</label>
+              <select v-model="form.tipo"><option value="">—</option><option>Rodada Comercial</option><option>Escuta Ativa</option><option>Feedback</option><option>PDI</option><option>Acompanhamento</option><option>Outro</option></select>
+            </div>
+            <div class="form-group"><label>Status</label>
+              <select v-model="form.status2"><option value="">—</option><option>Iniciado</option><option>Em andamento</option><option>Concluído</option><option>Agendado</option></select>
+            </div>
+            <div class="form-group"><label>Risco?</label><select v-model="form.risco"><option :value="false">Não</option><option :value="true">Sim ⚠️</option></select></div>
+            <div class="form-group"><label>Plano de Ação?</label><select v-model="form.planoAcao"><option :value="false">Não</option><option :value="true">Sim</option></select></div>
+            <div class="form-group full"><label>Comentários</label><textarea v-model="form.comentarios" rows="3" placeholder="O que foi tratado neste contato?"></textarea></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" @click="salvarContato" :disabled="!form.contatoId||!form.data||salvando">Salvar Contato</button>
+            <button class="btn btn-ghost" @click="limparForm">Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div v-if="view==='historico'">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Histórico de Interações</div>
+            <div class="filters">
+              <select v-model="histFiltroUnidade" style="width:130px">
+                <option value="">Todas as unidades</option>
+                <option v-for="u in todasUnidades" :key="u" :value="u">{{ u }}</option>
+              </select>
+              <select v-model="histFiltroMes" style="width:120px">
+                <option value="">Todos os meses</option>
+                <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+                <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+              </select>
+              <input type="text" v-model="histBusca" placeholder="🔍 Buscar nome..." style="width:150px">
+            </div>
+          </div>
+          <div style="padding:14px 18px">
+            <div v-if="!historicoFiltrado.length" class="empty">Nenhum registro encontrado.</div>
+            <div v-for="h in historicoFiltrado" :key="h.id" class="hist-item">
+              <div class="hist-item-top">
+                <div>
+                  <div class="hist-nome">{{ nomeC(h.contatoId) }}</div>
+                  <div style="font-size:10px;color:#888;margin-top:2px">
+                    <span :class="'badge u-'+uCls(unidadeC(h.contatoId))">{{ unidadeC(h.contatoId) }}</span>
+                    &nbsp;{{ cargoC(h.contatoId) }} &nbsp;·&nbsp; <span class="badge bp-badge">{{ bpC(h.contatoId) }}</span>
+                  </div>
+                </div>
+                <div class="hist-date">{{ fmtDate(h.data) }}</div>
+              </div>
+              <div class="hist-meta">
+                <span v-if="h.canal" class="hist-tag">{{ h.canal }}</span>
+                <span v-if="h.tipo" class="hist-tag">{{ h.tipo }}</span>
+                <span v-if="h.status2" class="hist-tag">{{ h.status2 }}</span>
+                <span v-if="h.risco" class="hist-tag" style="background:#fde8e8;color:#c0392b">⚠️ Risco</span>
+                <span v-if="h.planoAcao" class="hist-tag" style="background:#e8f4fd;color:#2980b9">📋 Plano de Ação</span>
+              </div>
+              <div v-if="h.comentarios" class="hist-comment">"{{ h.comentarios }}"</div>
+            </div>
+          </div>
+          <div style="padding:10px 18px;font-size:11px;color:#888;border-top:1px solid #f0f0f0">{{ historicoFiltrado.length }} registros</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div v-if="modalContato" class="modal-overlay" @click.self="modalContato=null">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3>{{ modalContato.nome }}</h3>
+          <div style="font-size:11px;color:#888;margin-top:3px">
+            <span :class="'badge u-'+uCls(modalContato.unidade)">{{ modalContato.unidade }}</span>
+            &nbsp;{{ modalContato.cargo }} &nbsp;·&nbsp; <span class="badge bp-badge">{{ modalContato.bp }}</span>
+          </div>
+        </div>
+        <button class="modal-close" @click="modalContato=null">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;background:#f8f9fa;border-radius:8px;padding:12px">
+          <div><div style="font-size:10px;color:#888">Status</div><span :class="'status-badge s-'+modalContato.status.toLowerCase()">{{ modalContato.status }}</span></div>
+          <div><div style="font-size:10px;color:#888">Último Contato</div><div style="font-weight:700;font-size:12px">{{ modalContato.ultimoContato?fmtDate(modalContato.ultimoContato):'—' }}</div></div>
+          <div><div style="font-size:10px;color:#888">Próximo</div><div style="font-weight:700;font-size:12px">{{ modalContato.proximoContato?fmtDate(modalContato.proximoContato):'—' }}</div></div>
+          <div><div style="font-size:10px;color:#888">Semestre</div><div style="font-weight:700;font-size:12px">{{ modalContato.qtdSem }}/{{ modalContato.metaSem }}</div></div>
+          <div><div style="font-size:10px;color:#888">Frequência</div><div style="font-size:12px">{{ modalContato.metaSem }}x/semestre</div></div>
+          <div><div style="font-size:10px;color:#888">Risco</div><div style="font-size:12px">{{ modalContato.risco?'⚠️ Sim':'Não' }}</div></div>
+        </div>
+        <div style="font-weight:700;margin-bottom:8px;font-size:12px">Histórico</div>
+        <div v-if="!histDoContato(modalContato.id).length" class="empty" style="padding:16px">Nenhum contato registrado.</div>
+        <div v-for="h in histDoContato(modalContato.id)" :key="h.id" class="hist-item">
+          <div class="hist-item-top">
+            <div class="hist-meta">
+              <span v-if="h.canal" class="hist-tag">{{ h.canal }}</span>
+              <span v-if="h.tipo" class="hist-tag">{{ h.tipo }}</span>
+              <span v-if="h.status2" class="hist-tag">{{ h.status2 }}</span>
+              <span v-if="h.risco" class="hist-tag" style="background:#fde8e8;color:#c0392b">⚠️ Risco</span>
+            </div>
+            <div class="hist-date">{{ fmtDate(h.data) }}</div>
+          </div>
+          <div v-if="h.comentarios" class="hist-comment">"{{ h.comentarios }}"</div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px;width:100%" @click="abrirRegistroModal(modalContato)">+ Registrar Novo Contato</button>
+      </div>
+    </div>
+  </div>
+  </template>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAxwiOiVXgBNPGWTSOAl9p_BqKgtb9yZFc",
+  authDomain: "crm-regua.firebaseapp.com",
+  databaseURL: "https://crm-regua-default-rtdb.firebaseio.com",
+  projectId: "crm-regua",
+  storageBucket: "crm-regua.firebasestorage.app",
+  messagingSenderId: "333904372979",
+  appId: "1:333904372979:web:39b4c21b71f54f8c9c8386"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const CONTATOS_INICIAIS = [
+  {id:"c001",nome:"ALECIO BERNARDINO DA SILVA",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c002",nome:"AMANDA MARTINS SOARES",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c003",nome:"ANA CAROLINA GOMES DOS SANTOS",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c004",nome:"BRUNO SBRALETTA MATOSINHOS",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c005",nome:"EDUARDO DE OLIVEIRA SANTOS",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c007",nome:"FABRICIO VIEIRA LOPES",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c008",nome:"GUSTAVO RODRIGUES COELHO",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c009",nome:"HENRIQUE GODINHO RUOCCOLO",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c010",nome:"JHADY CERDEIRA DE VASCONCELOS",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c011",nome:"JULIANA MACEDO SOARES NASCIMENTO",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c012",nome:"LUCAS CARVALHO GUERRA",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c013",nome:"MARCELO MESSIAS DA SILVA COSTA REIS",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c014",nome:"MAYRON CAMPI LIMA BARBOSA",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c015",nome:"MERCIO CARVALHO DA SILVA",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c016",nome:"PEDRO AUGUSTO SILVA MACHADO",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c017",nome:"RAFAEL GONCALVES TOME",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c018",nome:"PAULO HENRIQUE DUARTE MENDES PINTO",unidade:"BHZ",cargo:"Gestor de Unidade",bp:"Gabi",risco:false},
+  {id:"c019",nome:"BERNARDO FRADE SOUZA",unidade:"BHZ",cargo:"Líder de Equipe",bp:"Gabi",risco:false},
+  {id:"c020",nome:"EVERALDO SANTANA",unidade:"BHZ",cargo:"Líder de Equipe",bp:"Gabi",risco:false},
+  {id:"c021",nome:"FABIANO WERNER",unidade:"BRU",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c022",nome:"LUCAS ANDRADE FELESTRINO",unidade:"BRU",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c023",nome:"MAIRA VIANNA DE ANDRADE",unidade:"BRU",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c024",nome:"PEDRO HENRIQUE  MOUTINHO CAMPOS",unidade:"BRU",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c025",nome:"RAFAEL DOLABELLA MAIA",unidade:"BRU",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c026",nome:"TAMARA DANIELLE DA SILVA",unidade:"BRU",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c027",nome:"VICTOR FELIPE OLIVEIRA SOUZA",unidade:"BRU",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c028",nome:"TIAGO PAIVA BARBOSA",unidade:"BRU",cargo:"Líder de Equipe",bp:"Gabi",risco:false},
+  {id:"c029",nome:"BERNARDO CHALUB PEREIRA DA COSTA",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c031",nome:"JOAO LUIZ SILVA PIRES",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c030",nome:"VITOR AUGUSTO MADEIRA GOMES",unidade:"BHZ",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c032",nome:"JOAO PEDRO GENTIL GONCALVES DA ROCHA",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c033",nome:"MATHEUS PIMENTEL CARDOSO",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c035",nome:"PALOMA DE LAVOR LOPES",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c036",nome:"PEDRO FAJARDO DA CUNHA",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c037",nome:"ROBERTO COSTA PEREIRA",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c038",nome:"SAMUEL FERNANDO SCALISE MIRANDA FILHO",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c039",nome:"VANESSA DOS PASSOS CORREA",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c040",nome:"VICTOR DE AGUIAR SOARES",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c041",nome:"WALACE SILVA DE SOUZA",unidade:"RJO",cargo:"Assessor",bp:"Gabi",risco:false},
+  {id:"c042",nome:"JEAN MALTA NOGUEIRA",unidade:"RJO",cargo:"Gestor de Unidade",bp:"Gabi",risco:false},
+  {id:"c043",nome:"BRUNA CARIELLO",unidade:"RJO",cargo:"Líder de Equipe",bp:"Gabi",risco:false},
+  {id:"c044",nome:"AMANDA BOAVENTURA XAVIER",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c045",nome:"DANILO DE VELLASCO VILLELA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c046",nome:"FELIPE SANTOS BORGES",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c047",nome:"FELIPE THIAGO DALPRA PESSOA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c048",nome:"GUSTAVO SHIGUERU TAYAMICHI SATO",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c049",nome:"HENRIQUE GALVAO COLARES",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c050",nome:"HINDENBURG DE ALENCAR BARRETO COELHO NETO",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c051",nome:"IAN ARAUJO LOPES",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c052",nome:"JOYCE STEFANNI DE SOUSA ROLINS",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c053",nome:"JULIANA DAVID ALVES DE LIMA E CASTRO",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c054",nome:"MATEUS BATTELLA DE SIQUEIRA SIMOES",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c055",nome:"MATHEUS MENEZES MACHADO",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c056",nome:"MAURÍCIO JOSÉ VIANA REAL DE LEMOS",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c057",nome:"NICHOLAS GONCALVES CAMARA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c058",nome:"PATRICIA TRIGUEIRO DA MOTA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c059",nome:"PAULO HENRIQUE FRANÇA DA SILVA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c060",nome:"PEDRO AGUIAR LIMA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c061",nome:"RACHEL MENDONCA COSTA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c062",nome:"RAFAEL ALVES DE BRITO OLIVEIRA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c063",nome:"RAFAEL HELBOURN BASTOS",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c064",nome:"TEODORO ARAGÃO DA ROCHA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c065",nome:"THALES NASCIMENTO DE FARIA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c066",nome:"THIAGO SANTANA DE OLIVEIRA",unidade:"BSB",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c067",nome:"DAVI LELIS FERREIRA",unidade:"BSB",cargo:"Gestor de Unidade",bp:"Marina",risco:false},
+  {id:"c068",nome:"LUCAS CINTRA FERNANDES",unidade:"BSB",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c069",nome:"ROGÉRIO DE MORAES SILVA JUNIOR",unidade:"BSB",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c070",nome:"VITOR CARDOSO BORGES LEAL",unidade:"BSB",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c071",nome:"CAIO CESAR SILVA",unidade:"GYN",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c072",nome:"EVERTON SANTOS DE SOUSA",unidade:"GYN",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c073",nome:"FERNANDO ASSUNCAO MIRANDA",unidade:"GYN",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c074",nome:"JOAO LUCAS SILVEIRA DUTRA",unidade:"GYN",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c075",nome:"JOAO PEDRO CORDEIRO ROCHA",unidade:"GYN",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c076",nome:"SAMUEL MERHEB VAZ PESSOA",unidade:"GYN",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c077",nome:"DANTE ARIEL DE OLIVEIRA ARAUJO",unidade:"GYN",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c078",nome:"ANDREA DE AGUIAR DIAS SARAIVA GOMES",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c079",nome:"BERNARDO CASCAO BOUGLEUX COUTO",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c080",nome:"BRUNO MORAES DE CALDAS",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c081",nome:"CARLOS AUGUSTO RIBEIRO LIMA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c082",nome:"CRISTIANE GOMES PEREIRA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c083",nome:"DANILO WESLEI MORAES DE SOUZA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c084",nome:"DARLINGTON DE PAIVA BERNARDES",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c085",nome:"FABIANO PIRES VIEIRA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c086",nome:"FABIO SARAIVA BARBOSA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c087",nome:"FABRICIO BARBOSA DE LIMA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c088",nome:"FRANCISCO FELIPE AVILAR TEIXEIRA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c089",nome:"GIANCARLO SIDOTI",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c090",nome:"GUILHERME DE ASSIS COLOSSSAL",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c091",nome:"HIGOR RABELO DA SILVA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c092",nome:"JOAO GONCALVES NETO",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c093",nome:"JOAO VICTOR MUSSO GOMES DE SOUZA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c094",nome:"KEONE REIMANN KOJIN",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c095",nome:"LEONARDO CASINI LUCAS",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c096",nome:"LETICIA VERAS BATISTA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c097",nome:"LUIS GUSTAVO RODRIGUES",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c098",nome:"MARCELO DE MOURA ROSA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c099",nome:"PEDRO HENRIQUE CARNEIRO GONÇALVES",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c100",nome:"RAMON SERRAO COSER",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c101",nome:"THIAGO  VALENCIA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c102",nome:"TIAGO DAMASCENO DE BARROS MORGADO",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c103",nome:"VIVIAN BUSCH",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c104",nome:"WESLEY DA SILVA FEITOSA",unidade:"SP",cargo:"Assessor",bp:"Marina",risco:false},
+  {id:"c105",nome:"RODOLFO GASPAR CARNEIRO DE MENDONCA",unidade:"SP",cargo:"Gestor de Unidade",bp:"Marina",risco:false},
+  {id:"c106",nome:"ALINE GEORGE DA CUNHA",unidade:"SP",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c107",nome:"DANIEL ASSENÇÃO TELES BARBOSA",unidade:"SP",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c108",nome:"GUSTAVO TROTTA DE MENDONÇA",unidade:"SP",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c109",nome:"LUIZ ANTONIO MARQUES JUNIOR",unidade:"SP",cargo:"Líder de Equipe",bp:"Marina",risco:false},
+  {id:"c110",nome:"ATHOS FONTENELLE FITTIPALDI",unidade:"CAC",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c111",nome:"LUIZ FELIPE GONÇALVES GAVA",unidade:"CAC",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c112",nome:"ROMULO NUNES GONCALVES",unidade:"CAC",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c113",nome:"VICTOR LEAL SARTORIO",unidade:"CAC",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c114",nome:"VINICIUS PARIS DE MORAES",unidade:"CAC",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c115",nome:"DIOGO CARVALHO MENEGUELLI",unidade:"CAC",cargo:"Líder de Equipe",bp:"Sara",risco:false},
+  {id:"c116",nome:"GUIDO JOSE  BROETTO",unidade:"LIN",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c117",nome:"WILLIAN DE ANGELI PRATA",unidade:"LIN",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c118",nome:"GABRIEL MATTEDI CECCO",unidade:"LIN",cargo:"Líder de Equipe",bp:"Sara",risco:false},
+  {id:"c119",nome:"ALESSANDRA REIS ESTANISLAU",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c120",nome:"DANILO DOS SANTOS CHAVES",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c121",nome:"ENZO DE ANDRADE DORIGHETO",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c122",nome:"FILIPPE FIORESI SILY",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c123",nome:"JAIR RODRIGUES DOS SANTOS",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c124",nome:"JOAO VITOR LUCHI ALMEIDA",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c125",nome:"JULIA BORTOLINI LIMA",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c126",nome:"LUCAS BETINI MOTTA",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c127",nome:"LUCAS DE SOUZA SOARES",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c128",nome:"LUIZ FELIPE ZON WERNECK GUIMARAES",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c129",nome:"MATEUS DIAS RIOS",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c130",nome:"MAURO BUENO DO NASCIMENTO",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c131",nome:"YAGO LOUREIRO COMERIO",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c132",nome:"ÍCARO FORTES VENTURA",unidade:"NEX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c133",nome:"ISADORA GIARETTA GONZAGA",unidade:"NEX",cargo:"Gestor de Unidade",bp:"Sara",risco:false},
+  {id:"c134",nome:"GABRIEL MIGUEL VALENZUELA",unidade:"NEX",cargo:"Líder de Equipe",bp:"Sara",risco:false},
+  {id:"c135",nome:"JOSE CARLOS RIBEIRO JUNIOR",unidade:"NEX",cargo:"Líder de Equipe",bp:"Sara",risco:false},
+  {id:"c136",nome:"LINCOLN DE ANDRADE DORIGHETO",unidade:"NEX",cargo:"Líder de Equipe",bp:"Sara",risco:false},
+  {id:"c138",nome:"ADYR NICCHIO NETO",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c139",nome:"ANDRE PEREIRA DA MOTTA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c141",nome:"BRUNO MENEGUELLI PECHINHO",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c144",nome:"CHARO LUCIO SILVA ALVES",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c145",nome:"CONRADO FREDERICO MOREIRA SANTOS",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c147",nome:"DANIEL DE ALBUQUERQUE COLA PIM",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c148",nome:"DOUGLAS NIERO",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c149",nome:"DURVAL ALAISSON DA SILVA VIEIRA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c150",nome:"EDUARDO DEPES VERGARA LOPES",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c154",nome:"GABRIEL GRILLO PANSIERE",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c155",nome:"GABRIEL MAZZEGA MARINHO",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c156",nome:"GABRIELA PESSOTI CHIABAI",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c157",nome:"GUILHERME MARGOTTO GRAMELICH",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c158",nome:"HENRIQUE RIZZI FERREIRA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c159",nome:"HENRIQUE STANCIOLI TONOLI",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c160",nome:"IGOR AMADO RAMOS",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c161",nome:"JOAO PEDRO SCARDINI PRATA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c162",nome:"JOAO VICTOR ROSSONI RONCHI",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c163",nome:"JOAO VITOR POMPERMAYER VETTORACI",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c164",nome:"JOSE EDUARDO GONCALVES BARROS",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c166",nome:"LEONARDO BORGO MACHADO DOS SANTOS",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c167",nome:"LEONARDO GUSTAVO PASTORE DYNA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c168",nome:"LORENA MARIA STEIN DE SIQUEIRA VAREJAO",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c169",nome:"LUCAS DEIVID DE SOUZA MIRANDA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c171",nome:"LUIZ HENRIQUE FARONI BORTOLON",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c172",nome:"MAICON PIZZOL",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c173",nome:"MARCEL PEREIRA LIMA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c176",nome:"MARIANA EMELLY DA SILVA QUINTANILHA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c177",nome:"MURILO BONFIM MARQUES",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c178",nome:"NATALIA MOREIRA ZUCCHI",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c179",nome:"PEDRO HENRIQUE DA COSTA SILVA",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c180",nome:"PEDRO HENRIQUE SCARAMUSSA RAMOS",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c181",nome:"RAQUEL RODRIGUES PIRES BERMOND",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c185",nome:"THIAGO GIAVARINI CAPELINI",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c188",nome:"VITOR GIACOMIN PIMENTEL",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c190",nome:"VYCTOR FIALHO NACARATI TAVARES",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c191",nome:"WAGNER LEON VAREJAO",unidade:"VIX",cargo:"Assessor",bp:"Sara",risco:false},
+  {id:"c192",nome:"DANIELA HEMERLY EMERY CADE",unidade:"VIX",cargo:"Gestor de Unidade",bp:"Sara",risco:false},
+  {id:"c193",nome:"FABRICIO ALVES NORBIM RODRIGUES",unidade:"VIX",cargo:"Líder de Equipe",bp:"Sara",risco:false},
+  {id:"c195",nome:"JARDEL NOGUEIRA OLIVEIRA LAGO",unidade:"VIX",cargo:"Líder de Equipe",bp:"Sara",risco:false},
+  {id:"c196",nome:"POLLYANNE CRISTINA VENTURINI DE OLIVEIRA MAIA",unidade:"VIX",cargo:"Líder de Equipe",bp:"Sara",risco:false}
+];
+
+const HISTORICO_INICIAL = [
+  {id:"h001",contatoId:"c018",data:"2026-01-21",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h002",contatoId:"c042",data:"2026-01-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h003",contatoId:"c036",data:"2026-01-13",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h004",contatoId:"c035",data:"2026-01-20",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h005",contatoId:"c119",data:"2026-01-28",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h006",contatoId:"c043",data:"2026-01-28",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h007",contatoId:"c019",data:"2026-01-28",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h008",contatoId:"c015",data:"2026-01-20",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h009",contatoId:"c020",data:"2026-01-22",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h010",contatoId:"c028",data:"2026-01-28",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h011",contatoId:"UNKNOWN",data:"2026-01-28",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h012",contatoId:"c031",data:"2026-01-28",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h013",contatoId:"c041",data:"2026-01-13",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h014",contatoId:"UNKNOWN",data:"2026-01-19",canal:"Reunião",tipo:"Acompanhamento",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h015",contatoId:"c018",data:"2026-02-26",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h016",contatoId:"c042",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h017",contatoId:"c043",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h018",contatoId:"c019",data:"2026-02-26",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h019",contatoId:"c015",data:"2026-02-26",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h020",contatoId:"c020",data:"2026-02-26",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h021",contatoId:"c028",data:"2026-02-26",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h022",contatoId:"c040",data:"2026-02-27",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h023",contatoId:"c038",data:"2026-02-27",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h024",contatoId:"UNKNOWN",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h025",contatoId:"c005",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h026",contatoId:"c007",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h027",contatoId:"c001",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h028",contatoId:"c027",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h029",contatoId:"c004",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h030",contatoId:"c012",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h031",contatoId:"c023",data:"2026-02-23",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h032",contatoId:"c013",data:"2026-02-24",canal:"",tipo:"",status2:"",risco:false,planoAcao:false,comentarios:""},
+  {id:"h033",contatoId:"c018",data:"2026-03-26",canal:"WhatsApp",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h034",contatoId:"c042",data:"2026-03-06",canal:"Presencial",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h035",contatoId:"c043",data:"2026-03-24",canal:"WhatsApp",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h036",contatoId:"c019",data:"2026-03-13",canal:"WhatsApp",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h037",contatoId:"c015",data:"2026-03-30",canal:"WhatsApp",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:"Conferindo tarefas do Fórum de Gente"},
+  {id:"h038",contatoId:"c020",data:"2026-03-13",canal:"WhatsApp",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h039",contatoId:"c028",data:"2026-03-16",canal:"WhatsApp",tipo:"Feedback",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h040",contatoId:"c032",data:"2026-03-06",canal:"WhatsApp",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h041",contatoId:"c037",data:"2026-03-13",canal:"Reunião",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h042",contatoId:"c014",data:"2026-03-30",canal:"WhatsApp",tipo:"Rodada Comercial",status2:"Em andamento",risco:false,planoAcao:false,comentarios:""},
+  {id:"h043",contatoId:"c004",data:"2026-03-27",canal:"WhatsApp",tipo:"Escuta Ativa",status2:"Iniciado",risco:false,planoAcao:false,comentarios:"Parabenizei sobre o partnership"},
+  {id:"h044",contatoId:"c033",data:"2026-03-06",canal:"Presencial",tipo:"Escuta Ativa",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h045",contatoId:"c039",data:"2026-03-06",canal:"Presencial",tipo:"Rodada Comercial",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h046",contatoId:"c022",data:"2026-03-16",canal:"Reunião",tipo:"Acompanhamento",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h047",contatoId:"c036",data:"2026-03-19",canal:"Presencial",tipo:"PDI",status2:"Iniciado",risco:false,planoAcao:false,comentarios:""},
+  {id:"h048",contatoId:"UNKNOWN",data:"2026-03-06",canal:"Presencial",tipo:"Feedback",status2:"Iniciado",risco:true,planoAcao:false,comentarios:"Conversamos sobre a necessidade de intensidade dele, não soube me dizer no que poderia melhorar."},
+  {id:"h049",contatoId:"c021",data:"2026-04-07",canal:"",tipo:"",status2:"Agendado",risco:false,planoAcao:false,comentarios:"Saúde do pai e resgates grandes. Conversar a pedido do líder."}
+];
+
+function metaPorCargo(c){ return (c==='Gestor de Unidade'||c==='Líder de Equipe')?6:2; }
+function intervaloDias(c){ return (c==='Gestor de Unidade'||c==='Líder de Equipe')?30:90; }
+function getSemestre(d){ return new Date(d).getMonth()<6?1:2; }
+function getAno(d){ return new Date(d).getFullYear(); }
+
+function calcMetaMes(contatos, historico, mes, ano){
+  // Jan, Fev, Mar de 2026: líderes/gestores (mensal) + 1/3 assessores, tudo 100% realizado
+  if(ano===2026 && mes<=3){
+    const gestores = contatos.filter(c=>c.cargo==='Gestor de Unidade'||c.cargo==='Líder de Equipe').length;
+    const assessores = contatos.filter(c=>c.cargo!=='Gestor de Unidade'&&c.cargo!=='Líder de Equipe').length;
+    const planejados = gestores + Math.ceil(assessores/3);
+    return{planejados, realizados:planejados, pct:100};
+  }
+  const inicioMes = new Date(ano, mes-1, 1);
+  const fimMes   = new Date(ano, mes, 0, 23, 59, 59);
+  let planejados=0, realizados=0;
+  for(const c of contatos){
+    const hists = historico.filter(h=>h.contatoId===c.id).sort((a,b)=>a.data.localeCompare(b.data));
+    const noMes  = hists.filter(h=>{ const d=new Date(h.data); return d>=inicioMes&&d<=fimMes; });
+    const antes  = hists.filter(h=>new Date(h.data)<inicioMes);
+    let planejado=false;
+    if(c.cargo==='Gestor de Unidade'||c.cargo==='Líder de Equipe'){
+      planejado=true;
+    } else {
+      if(antes.length===0){
+        planejado=true;
+      } else {
+        const ultimo=antes[antes.length-1];
+        const prox=new Date(ultimo.data);
+        prox.setDate(prox.getDate()+90);
+        planejado=prox<=fimMes;
+      }
+    }
+    if(planejado){ planejados++; if(noMes.length>0) realizados++; }
+  }
+  const pct=planejados>0?Math.round(realizados/planejados*100):0;
+  return{planejados,realizados,pct};
+}
+
+createApp({
+  data(){
+    const d=new Date();
+    return{
+      loading:true, salvando:false,
+      view:'dashboard', bpFiltro:'Todos',
+      contatos:[], historico:[],
+      filtroUnidade:'',filtroCargo:'',filtroStatus:'',busca:'',
+      histBusca:'',histFiltroUnidade:'',histFiltroMes:'',
+      modalContato:null, registroSucesso:false,
+      anoAtual:d.getFullYear(),
+      hoje:d.toISOString().split('T')[0],
+      form:{contatoId:'',data:'',canal:'',tipo:'',status2:'',risco:false,planoAcao:false,comentarios:''},
+      unidadesPorBP:{Gabi:['BHZ','RJO','BRU'],Marina:['SP','BSB','GYN'],Sara:['VIX','NEX','LIN','CAC']}
+    };
+  },
+  async mounted(){
+    const snap=await db.ref('contatos').once('value');
+    if(!snap.val()){
+      const co={};CONTATOS_INICIAIS.forEach(c=>co[c.id]=c);
+      const ho={};HISTORICO_INICIAL.forEach(h=>ho[h.id]=h);
+      await db.ref('contatos').set(co);
+      await db.ref('historico').set(ho);
+    } else {
+      // Migrar siglas antigas -> novas (NExus->NEX, Linhares->LIN, Cachoeiro->CAC)
+      const renomeMap={'NExus':'NEX','Linhares':'LIN','Cachoeiro':'CAC'};
+      const cObj=snap.val();
+      const updates={};
+      for(const id in cObj){
+        const u=cObj[id].unidade;
+        if(renomeMap[u]) updates['contatos/'+id+'/unidade']=renomeMap[u];
+      }
+      // Remover contatos descontinuados (por nome, case-insensitive)
+      const removerNomes=['GESSICA DA SILVA SOARES','VITOR PEREIRA CAPELI','VIRGILIO ALVES LOURENCO LAGE','STEFAN SARKIS WOELFFEL FURTADO','VINICIUS SALDANHA SOARES PINTO','ROBERTO BALARINI JUNIOR','ROBERTO UILLIAN DA SILVA','MARCO ANTONIO SOLANO SALMASO','LUIZ GUILHERME BELTRAO BARCIK','EUSTAQUIO MAFRA','BRUNO THOMAZ LOTT','CAMILA BARBOSA DE SOUZA GARCIA','ADRIANO MORANDI RONDELI','MARCUS ARAUJO ALVES DOS SANTOS','FLAVIO GONCALVES MACIEL DE FIGUEIREDO','FELIPE PINHEIRO SATHLER','KONRAD CAMPOS SALOMAO','DANIEL BASILIO GIESTAS','ARTHUR MASSUCATTI RONDELI','MYRNA SILVEIRA DE SOUZA VASCONCELOS','BRUNO MANSUR DE MELLO GONCALVES'].map(n=>n.toUpperCase());
+      for(const id in cObj){
+        const nm=(cObj[id].nome||'').toUpperCase();
+        if(removerNomes.includes(nm)) updates['contatos/'+id]=null;
+      }
+      // Garantir que VITOR AUGUSTO MADEIRA GOMES exista
+      const temVitor=Object.values(cObj).some(c=>(c.nome||'').toUpperCase()==='VITOR AUGUSTO MADEIRA GOMES');
+      if(!temVitor) updates['contatos/c030']={id:'c030',nome:'VITOR AUGUSTO MADEIRA GOMES',unidade:'BHZ',cargo:'Assessor',bp:'Gabi',risco:false};
+      if(Object.keys(updates).length>0) await db.ref().update(updates);
+    }
+    db.ref('contatos').on('value',snap=>{const v=snap.val();this.contatos=v?Object.values(v):[];});
+    db.ref('historico').on('value',snap=>{const v=snap.val();this.historico=v?Object.values(v):[];this.loading=false;});
+  },
+  computed:{
+    today(){ return new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); },
+    mesAtual(){ return new Date().getMonth()+1; },
+    nomesMeses(){ return['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; },
+    viewTitle(){ return{dashboard:'Dashboard',contatos:'Contatos',registrar:'Registrar Contato',historico:'Histórico de Interações'}[this.view]; },
+    todasUnidades(){
+      const m={Gabi:['BHZ','RJO','BRU'],Marina:['SP','BSB','GYN'],Sara:['VIX','NEX','LIN','CAC']};
+      return this.bpFiltro!=='Todos'?(m[this.bpFiltro]||[]):['BHZ','RJO','BRU','SP','BSB','GYN','VIX','NEX','LIN','CAC'];
+    },
+    unidadesFiltradas(){ return this.todasUnidades; },
+    contatosComStatus(){
+      const hoje=this.hoje,sem=new Date().getMonth()<6?1:2,ano=new Date().getFullYear();
+      return this.contatos.map(c=>{
+        const hists=[...this.historico].filter(h=>h.contatoId===c.id).sort((a,b)=>b.data.localeCompare(a.data));
+        const ultimo=hists[0]?.data||null;
+        const meta=metaPorCargo(c.cargo),inter=intervaloDias(c.cargo);
+        const qtdSem=hists.filter(h=>getSemestre(h.data)===sem&&getAno(h.data)===ano).length;
+        let prox=null,status='URGENTE';
+        if(ultimo){const d=new Date(ultimo);d.setDate(d.getDate()+inter);prox=d.toISOString().split('T')[0];status=prox>=hoje?'EM DIA':'VENCIDO';}
+        return{...c,ultimoContato:ultimo,proximoContato:prox,status,metaSem:meta,qtdSem,progressoSem:meta?qtdSem/meta:0};
+      });
+    },
+    contatosFiltradosPorBP(){ return this.bpFiltro==='Todos'?this.contatosComStatus:this.contatosComStatus.filter(c=>c.bp===this.bpFiltro); },
+    contatosFiltrados(){
+      return this.contatosFiltradosPorBP.filter(c=>{
+        if(this.filtroUnidade&&c.unidade!==this.filtroUnidade)return false;
+        if(this.filtroCargo&&c.cargo!==this.filtroCargo)return false;
+        if(this.filtroStatus&&c.status!==this.filtroStatus)return false;
+        if(this.busca&&!c.nome.toLowerCase().includes(this.busca.toLowerCase()))return false;
+        return true;
+      });
+    },
+    contatosAlerta(){ return this.contatosFiltradosPorBP.filter(c=>c.status==='URGENTE'||c.status==='VENCIDO').sort((a,b)=>({URGENTE:0,VENCIDO:1}[a.status]??9)-({URGENTE:0,VENCIDO:1}[b.status]??9)); },
+    totalAlerta(){ return this.contatosAlerta.length; },
+    alertasPorBP(){
+      const res={};
+      ['Gabi','Marina','Sara'].forEach(bp=>{ res[bp]=this.contatosComStatus.filter(c=>c.bp===bp&&(c.status==='URGENTE'||c.status==='VENCIDO')).length; });
+      return res;
+    },
+    stats(){ const cs=this.contatosFiltradosPorBP; return{total:cs.length,emDia:cs.filter(c=>c.status==='EM DIA').length,vencido:cs.filter(c=>c.status==='VENCIDO').length,urgente:cs.filter(c=>c.status==='URGENTE').length}; },
+    statsPorUnidade(){
+      const res={};
+      this.contatosComStatus.forEach(c=>{ if(!res[c.unidade])res[c.unidade]={total:0,emDia:0}; res[c.unidade].total++; if(c.status==='EM DIA')res[c.unidade].emDia++; });
+      return res;
+    },
+    metaMesAtual(){ return calcMetaMes(this.contatosFiltradosPorBP,this.historico,this.mesAtual,this.anoAtual); },
+    metaBP(){
+      const res={};
+      ['Gabi','Marina','Sara'].forEach(bp=>{ const cs=this.contatosComStatus.filter(c=>c.bp===bp); res[bp]=calcMetaMes(cs,this.historico,this.mesAtual,this.anoAtual); });
+      return res;
+    },
+    historicoMetas(){
+      const meses=[];
+      for(let m=1;m<=this.mesAtual;m++){
+        const r=calcMetaMes(this.contatosFiltradosPorBP,this.historico,m,this.anoAtual);
+        meses.push({mes:m,nome:this.nomesMeses[m],...r});
+      }
+      return meses.reverse();
+    },
+    historicoFiltrado(){
+      return[...this.historico].filter(h=>{
+        const c=this.contatos.find(x=>x.id===h.contatoId);
+        if(!c)return false;
+        if(this.bpFiltro!=='Todos'&&c.bp!==this.bpFiltro)return false;
+        if(this.histFiltroUnidade&&c.unidade!==this.histFiltroUnidade)return false;
+        if(this.histBusca&&!c.nome.toLowerCase().includes(this.histBusca.toLowerCase()))return false;
+        if(this.histFiltroMes&&h.data.slice(5,7)!==this.histFiltroMes)return false;
+        return true;
+      }).sort((a,b)=>b.data.localeCompare(a.data));
+    },
+  },
+  methods:{
+    fmtDate(d){if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;},
+    uCls(u){return(u||'').toLowerCase().replace(/\s/g,'');},
+    cargoCls(c){if(!c)return'';if(c.includes('Gestor'))return'cargo-gestor';if(c.includes('Líder'))return'cargo-lider';return'cargo-assessor';},
+    pctCor(p){return p>=80?'c-ok':p>=50?'c-med':'c-low';},
+    pctFill(p){return p>=80?'f-ok':p>=50?'f-med':'f-low';},
+    pProgPct(s){return(!s||!s.total)?0:Math.round(s.emDia/s.total*100);},
+    pProgClass(s){const p=this.pProgPct(s);return p<50?'danger':p<80?'warn':'';},
+    diasAtraso(c){if(!c.proximoContato)return 0;return Math.max(0,Math.floor((new Date(this.hoje)-new Date(c.proximoContato))/86400000));},
+    nomeC(id){return this.contatos.find(c=>c.id===id)?.nome||'';},
+    unidadeC(id){return this.contatos.find(c=>c.id===id)?.unidade||'';},
+    cargoC(id){return this.contatos.find(c=>c.id===id)?.cargo||'';},
+    bpC(id){return this.contatos.find(c=>c.id===id)?.bp||'';},
+    histDoContato(id){return[...this.historico].filter(h=>h.contatoId===id).sort((a,b)=>b.data.localeCompare(a.data));},
+    contatosPorUnidade(un){return this.contatosFiltradosPorBP.filter(c=>c.unidade===un);},
+    abrirRegistro(c){this.form.contatoId=c.id;this.form.data=this.hoje;this.view='registrar';},
+    abrirRegistroModal(c){this.modalContato=null;this.abrirRegistro(c);},
+    verHistorico(c){this.modalContato=this.contatosComStatus.find(x=>x.id===c.id);},
+    async salvarContato(){
+      if(!this.form.contatoId||!this.form.data)return;
+      this.salvando=true;
+      const id='h'+Date.now();
+      await db.ref('historico/'+id).set({id,...this.form});
+      if(this.form.risco) await db.ref('contatos/'+this.form.contatoId+'/risco').set(true);
+      this.salvando=false;this.registroSucesso=true;
+      setTimeout(()=>this.registroSucesso=false,3000);
+      this.limparForm();
+    },
+    limparForm(){this.form={contatoId:'',data:this.hoje,canal:'',tipo:'',status2:'',risco:false,planoAcao:false,comentarios:''};},
+  }
+}).mount('#app');
+</script>
+<script>
+(function(){
+  document.body.style.opacity='0';
+  firebase.auth().onAuthStateChanged(u=>{
+    if(!u){window.location.href='login.html';return;}
+    document.body.style.opacity='1';
+  });
+})();
+</script>
+</body>
+</html>

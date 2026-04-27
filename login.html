@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login &middot; Portal BP</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<style>
+:root{
+  --bg:#F5EDD7;--card:#FFFFFF;--navy:#1B3A6B;--navy2:#2D6A9F;
+  --gold:#C4922A;--orange:#E87722;--teal:#0B6E8C;
+  --green:#1A6B3C;--red:#9B1C1C;--text:#1E293B;--muted:#64748B;
+  --border:#D4C5A9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);
+     min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+.login-wrap{width:100%;max-width:400px;padding:24px}
+
+.logo-area{text-align:center;margin-bottom:32px}
+.logo-area .icon{font-size:48px;margin-bottom:12px;display:block}
+.logo-area h1{font-size:22px;font-weight:800;color:var(--navy)}
+.logo-area h1 em{color:var(--gold);font-style:normal}
+.logo-area p{font-size:12px;color:var(--muted);margin-top:6px}
+
+.login-card{background:var(--card);border-radius:12px;padding:32px 28px;
+            box-shadow:0 4px 24px rgba(27,58,107,.12);border:1px solid var(--border);
+            border-top:4px solid var(--navy)}
+
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:12px;font-weight:700;color:var(--navy);
+                   margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;
+                   font-size:14px;color:var(--text);background:#FAFAF5;transition:border .2s}
+.form-group input:focus{outline:none;border-color:var(--navy);background:#fff;
+                         box-shadow:0 0 0 3px rgba(27,58,107,.1)}
+
+.btn-login{width:100%;padding:14px;background:var(--navy);color:#fff;border:none;
+           border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;
+           letter-spacing:.5px;transition:all .2s}
+.btn-login:hover{background:var(--navy2);transform:translateY(-1px);
+                 box-shadow:0 4px 12px rgba(27,58,107,.3)}
+.btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.error-msg{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);
+           border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:16px;
+           display:none;text-align:center}
+.error-msg.show{display:block}
+
+.footer-txt{text-align:center;margin-top:24px;font-size:10px;color:var(--muted)}
+.footer-txt b{color:var(--gold)}
+
+.loading{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+         border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;
+         vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.forgot-link{display:block;text-align:center;margin-top:14px;font-size:11px;color:var(--navy2);
+             text-decoration:none;cursor:pointer}
+.forgot-link:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="logo-area">
+    <span class="icon">&#128274;</span>
+    <h1>Portal <em>BP</em></h1>
+    <p>Acesso restrito &middot; Equipe de Business Partners</p>
+  </div>
+
+  <div class="login-card">
+    <div class="error-msg" id="errMsg"></div>
+
+    <form id="loginForm" onsubmit="doLogin(event)">
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="email" placeholder="seu@email.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-login" id="btnLogin">Entrar</button>
+    </form>
+
+    <a class="forgot-link" onclick="resetPwd()">Esqueci minha senha</a>
+  </div>
+
+  <div class="footer-txt">
+    Equipe de <b>Business Partners</b> &middot; Valor Investimentos 2026
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAxwiOiVXgBNPGWTSOAl9p_BqKgtb9yZFc",
+  authDomain: "crm-regua.firebaseapp.com",
+  databaseURL: "https://crm-regua-default-rtdb.firebaseio.com",
+  projectId: "crm-regua",
+  storageBucket: "crm-regua.firebasestorage.app",
+  messagingSenderId: "333904372979",
+  appId: "1:333904372979:web:39b4c21b71f54f8c9c8386"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Se já logado, redireciona
+auth.onAuthStateChanged(user => {
+  if (user) window.location.href = 'index.html';
+});
+
+function showErr(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideErr() {
+  document.getElementById('errMsg').classList.remove('show');
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  hideErr();
+  const btn = document.getElementById('btnLogin');
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> Entrando...';
+
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+    window.location.href = 'index.html';
+  } catch (err) {
+    const msgs = {
+      'auth/user-not-found': 'E-mail não cadastrado.',
+      'auth/wrong-password': 'Senha incorreta.',
+      'auth/invalid-email': 'E-mail inválido.',
+      'auth/too-many-requests': 'Muitas tentativas. Tente novamente em alguns minutos.',
+      'auth/invalid-credential': 'E-mail ou senha incorretos.'
+    };
+    showErr(msgs[err.code] || 'Erro ao entrar. Tente novamente.');
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
+}
+
+async function resetPwd() {
+  const email = document.getElementById('email').value.trim();
+  if (!email) { showErr('Digite seu e-mail acima para recuperar a senha.'); return; }
+  hideErr();
+  try {
+    await auth.sendPasswordResetEmail(email);
+    showErr('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
+    document.getElementById('errMsg').style.background = '#F0FDF4';
+    document.getElementById('errMsg').style.borderColor = '#BBF7D0';
+    document.getElementById('errMsg').style.color = '#166534';
+  } catch (err) {
+    showErr('Não foi possível enviar o e-mail de recuperação.');
+  }
+}
+</script>
+</body>
+</html>

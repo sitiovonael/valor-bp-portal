@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planos de Ação · BP Comercial</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#F5EDD7;--card:#FFFFFF;--navy:#1B3A6B;--navy2:#2D6A9F;
+  --gold:#C4922A;--orange:#E87722;--teal:#0B6E8C;
+  --green:#1A6B3C;--red:#9B1C1C;--purple:#6B21A8;
+  --text:#1E293B;--muted:#64748B;--border:#D4C5A9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hdr{background:var(--navy);padding:18px 28px;box-shadow:0 3px 16px rgba(0,0,0,.25)}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.hdr h1{color:#fff;font-size:18px;font-weight:700;letter-spacing:.3px}
+.hdr h1 em{color:#F5C842;font-style:normal}
+.hdr-sub{color:rgba(255,255,255,.55);font-size:10.5px;margin-top:2px}
+.hdr-actions{display:flex;gap:10px;align-items:center}
+.portal-btn{display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.7);text-decoration:none;
+  font-size:11px;font-weight:600;padding:6px 14px;border:1px solid rgba(255,255,255,.25);border-radius:18px;transition:all .2s}
+.portal-btn:hover{color:#F5C842;border-color:#F5C842}
+.hdr-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  color:#F5C842;border-radius:18px;padding:4px 14px;font-size:11px;font-weight:700}
+
+.wrap{max-width:1320px;margin:0 auto;padding:24px}
+.title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:20px;font-weight:800;color:var(--navy)}
+.page-title small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:9px 18px;
+  border-radius:8px;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--navy2)}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gold:hover{background:#A8801F}
+.btn-ghost{background:transparent;color:var(--navy);border:1px solid var(--border)}
+.btn-ghost:hover{background:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-sm{padding:5px 12px;font-size:11px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border-radius:10px;padding:18px 20px;border:1px solid var(--border);border-left:4px solid var(--navy)}
+.kpi.k-blue{border-left-color:var(--navy)}
+.kpi.k-orange{border-left-color:var(--orange)}
+.kpi.k-green{border-left-color:var(--green)}
+.kpi.k-red{border-left-color:var(--red)}
+.kpi.k-purple{border-left-color:var(--purple)}
+.kpi-l{font-size:10.5px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.5px}
+.kpi-v{font-size:30px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1}
+.kpi-s{font-size:10.5px;color:var(--muted);margin-top:5px}
+
+.filters{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.filters label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.filters select,.filters input{font-size:12px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);font-family:inherit}
+.filters .spacer{flex:1}
+
+.layout{display:grid;grid-template-columns:1fr 320px;gap:18px}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+
+.card-box{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-h{padding:14px 18px;border-bottom:1px solid var(--border);font-size:13px;font-weight:800;color:var(--navy);display:flex;justify-content:space-between;align-items:center}
+.card-h .count{font-size:11px;color:var(--muted);font-weight:600}
+.card-b{padding:6px 0}
+.empty{padding:30px;text-align:center;color:var(--muted);font-size:12px}
+
+.plano{padding:14px 18px;border-bottom:1px solid #f0e6cf;cursor:pointer;transition:background .15s}
+.plano:hover{background:#fffbf2}
+.plano:last-child{border-bottom:none}
+.plano-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.plano-titulo{font-size:13px;font-weight:700;color:var(--navy);flex:1}
+.plano-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:10.5px;color:var(--muted)}
+.plano-meta span{background:#f5edd7;padding:2px 8px;border-radius:10px;font-weight:600}
+.plano-prog{margin-top:8px;display:flex;align-items:center;gap:8px}
+.bar{flex:1;height:5px;background:#e8dfc4;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:var(--green);transition:width .3s}
+.bar-fill.warn{background:var(--orange)}
+.bar-fill.bad{background:var(--red)}
+.prog-txt{font-size:10px;color:var(--muted);font-weight:700;min-width:42px;text-align:right}
+
+.bdg{font-size:9.5px;font-weight:700;text-transform:uppercase;padding:3px 9px;border-radius:10px;letter-spacing:.4px;white-space:nowrap}
+.bdg-aberto{background:#dbeafe;color:#1e40af}
+.bdg-andamento{background:#fef3c7;color:#92400e}
+.bdg-concluido{background:#dcfce7;color:#166534}
+.bdg-atrasado{background:#fee2e2;color:#991b1b}
+
+.side-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
+.side-card h3{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px}
+.tema-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 0;border-bottom:1px dashed #eee}
+.tema-row:last-child{border-bottom:none}
+.tema-row b{color:var(--navy);font-weight:800}
+.timeline-item{padding:8px 0;border-bottom:1px dashed #eee;font-size:11px}
+.timeline-item:last-child{border-bottom:none}
+.timeline-item .data{font-size:10px;color:var(--muted);font-weight:700}
+.timeline-item .titulo{color:var(--text);margin-top:2px}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal{background:#fff;border-radius:12px;max-width:780px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.modal-h{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:5}
+.modal-h h2{font-size:16px;color:var(--navy);font-weight:800}
+.modal-h .x{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1}
+.modal-b{padding:20px 24px}
+.modal-f{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:11px;font-weight:700;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.fld input,.fld select,.fld textarea{width:100%;font-size:13px;padding:9px 11px;border:1px solid var(--border);border-radius:6px;font-family:inherit;background:#fff;color:var(--text)}
+.fld textarea{resize:vertical;min-height:70px}
+.fld-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+.acao-item{background:#fffbf2;border:1px solid #e8dfc4;border-radius:8px;padding:11px 13px;margin-bottom:8px}
+.acao-row{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center}
+.acao-row input[type=text]{font-size:12px;padding:6px 9px;border:1px solid var(--border);border-radius:5px}
+.acao-row input[type=date]{font-size:11px;padding:6px 8px;border:1px solid var(--border);border-radius:5px}
+.acao-row select{font-size:11px;padding:6px 8px;border:1px solid var(--border);border-radius:5px}
+.acao-row .chk{width:16px;height:16px;cursor:pointer}
+.acao-row .del{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px}
+.acao-add{background:transparent;border:1px dashed var(--border);color:var(--navy);padding:8px 14px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;width:100%}
+.acao-add:hover{background:#fffbf2;border-color:var(--gold)}
+
+.anexo-item{display:flex;justify-content:space-between;align-items:center;background:#f5edd7;padding:7px 12px;border-radius:6px;margin-bottom:6px;font-size:11.5px}
+.anexo-item a{color:var(--navy);text-decoration:none;font-weight:600;word-break:break-all}
+.anexo-item a:hover{color:var(--gold)}
+.anexo-add{display:grid;grid-template-columns:1fr 1.5fr auto;gap:8px;margin-top:8px}
+.anexo-add input{font-size:11.5px;padding:7px 10px;border:1px solid var(--border);border-radius:5px}
+
+.tags-pessoas{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag-pessoa{background:#dbeafe;color:#1e40af;padding:3px 9px;border-radius:10px;font-size:10.5px;font-weight:700;display:flex;align-items:center;gap:5px}
+.tag-pessoa .x{cursor:pointer;font-size:13px;line-height:1}
+
+.footer{text-align:center;padding:16px;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:20px}
+.loading{text-align:center;padding:50px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <h1>Planos de <em>Ação</em> &middot; RH</h1>
+      <div class="hdr-sub">Registros de fórum de gente, acompanhamentos e ações &middot; tempo real</div>
+    </div>
+    <div class="hdr-actions">
+      <a href="index.html" class="portal-btn">&larr; Portal</a>
+      <div class="hdr-badge">VALOR &middot; 2026</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div v-if="loading" class="loading">Carregando planos…</div>
+
+  <template v-else>
+  <div class="title-row">
+    <div class="page-title">Planos de Ação <small>{{ planosFiltrados.length }} de {{ planos.length }} planos</small></div>
+    <button class="btn btn-gold" @click="abrirNovo">+ Novo Plano</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi k-blue"><div class="kpi-l">Abertos</div><div class="kpi-v">{{ kpis.aberto }}</div><div class="kpi-s">aguardando início</div></div>
+    <div class="kpi k-orange"><div class="kpi-l">Em Andamento</div><div class="kpi-v">{{ kpis.andamento }}</div><div class="kpi-s">com ações em curso</div></div>
+    <div class="kpi k-green"><div class="kpi-l">Concluídos no Mês</div><div class="kpi-v">{{ kpis.concluidoMes }}</div><div class="kpi-s">{{ nomeMesAtual }}</div></div>
+    <div class="kpi k-red"><div class="kpi-l">Atrasados</div><div class="kpi-v">{{ kpis.atrasado }}</div><div class="kpi-s">próx. revisão vencida</div></div>
+    <div class="kpi k-purple"><div class="kpi-l">Total 2026</div><div class="kpi-v">{{ kpis.total }}</div><div class="kpi-s">criados no ano</div></div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters">
+    <label>BP:</label>
+    <select v-model="fBp"><option value="">Todas</option><option>Gabi</option><option>Marina</option><option>Sara</option></select>
+    <label>Unidade:</label>
+    <select v-model="fUnidade"><option value="">Todas</option><option v-for="u in unidadesAll" :value="u">{{ u }}</option></select>
+    <label>Tema:</label>
+    <select v-model="fTema"><option value="">Todos</option><option v-for="t in TEMAS" :value="t">{{ t }}</option></select>
+    <label>Status:</label>
+    <select v-model="fStatus"><option value="">Todos</option><option>Aberto</option><option>Em andamento</option><option>Concluído</option><option>Atrasado</option></select>
+    <label>Busca:</label>
+    <input v-model="fBusca" placeholder="gestor, contexto…" style="min-width:180px">
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" @click="limparFiltros">Limpar</button>
+  </div>
+
+  <div class="layout">
+    <!-- Lista de planos -->
+    <div class="card-box">
+      <div class="card-h">Planos <span class="count">{{ planosFiltrados.length }} resultado(s)</span></div>
+      <div class="card-b">
+        <div v-if="planosFiltrados.length===0" class="empty">Nenhum plano encontrado.</div>
+        <div v-for="p in planosFiltrados" :key="p.id" class="plano" @click="abrirEdicao(p)">
+          <div class="plano-top">
+            <div class="plano-titulo">{{ p.gestor || '—' }} <span style="color:var(--muted);font-weight:500">· {{ p.tipo }}</span></div>
+            <span class="bdg" :class="badgeStatus(p)">{{ statusEfetivo(p) }}</span>
+          </div>
+          <div class="plano-meta">
+            <span>{{ formatData(p.data) }}</span>
+            <span>{{ p.unidade }}</span>
+            <span>{{ p.tema }}</span>
+            <span>{{ p.bpCriador }}</span>
+            <span v-if="p.proximaRevisao">↻ {{ formatData(p.proximaRevisao) }}</span>
+          </div>
+          <div v-if="(p.acoes && Object.keys(p.acoes).length>0)" class="plano-prog">
+            <div class="bar"><div class="bar-fill" :class="progClass(p)" :style="{width:progPct(p)+'%'}"></div></div>
+            <div class="prog-txt">{{ progDone(p) }}/{{ progTotal(p) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <div class="side-card">
+        <h3>Próximas revisões (14 dias)</h3>
+        <div v-if="proximasRevisoes.length===0" style="font-size:11px;color:var(--muted)">Nada agendado.</div>
+        <div v-for="p in proximasRevisoes" :key="'pr'+p.id" class="timeline-item" style="cursor:pointer" @click="abrirEdicao(p)">
+          <div class="data">{{ formatData(p.proximaRevisao) }} · {{ diasAte(p.proximaRevisao) }}</div>
+          <div class="titulo">{{ p.gestor }} <span style="color:var(--muted)">· {{ p.unidade }}</span></div>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>Planos por Tema</h3>
+        <div v-for="t in temasComContagem" :key="t.nome" class="tema-row">
+          <span>{{ t.nome }}</span><b>{{ t.count }}</b>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>Planos por Unidade</h3>
+        <div v-for="u in unidadesComContagem" :key="u.nome" class="tema-row">
+          <span>{{ u.nome }}</span><b>{{ u.count }}</b>
+        </div>
+      </div>
+    </div>
+  </div>
+  </template>
+
+  <!-- ============ MODAL ============ -->
+  <div v-if="modalAberto" class="modal-bg" @click.self="fecharModal">
+    <div class="modal">
+      <div class="modal-h">
+        <h2>{{ editando.id ? 'Editar Plano' : 'Novo Plano de Ação' }}</h2>
+        <button class="x" @click="fecharModal">×</button>
+      </div>
+      <div class="modal-b">
+        <div class="fld-row">
+          <div class="fld">
+            <label>Data da Reunião</label>
+            <input type="date" v-model="editando.data">
+          </div>
+          <div class="fld">
+            <label>Tipo</label>
+            <select v-model="editando.tipo">
+              <option v-for="t in TIPOS" :value="t">{{ t }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fld-row3">
+          <div class="fld">
+            <label>Unidade</label>
+            <select v-model="editando.unidade">
+              <option value="">—</option>
+              <option v-for="u in unidadesAll" :value="u">{{ u }}</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Gestor / Líder</label>
+            <input type="text" v-model="editando.gestor" placeholder="Nome do gestor ou líder">
+          </div>
+          <div class="fld">
+            <label>Tema</label>
+            <select v-model="editando.tema">
+              <option v-for="t in TEMAS" :value="t">{{ t }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fld">
+          <label>Contexto / Diagnóstico</label>
+          <textarea v-model="editando.contexto" placeholder="Resumo do que foi discutido na reunião…"></textarea>
+        </div>
+
+        <div class="fld">
+          <label>Pessoas vinculadas (opcional)</label>
+          <select @change="addPessoa($event)" style="width:100%">
+            <option value="">+ Vincular contato da régua…</option>
+            <option v-for="c in contatosDisponiveis" :value="c.id">{{ c.nome }} · {{ c.unidade }}</option>
+          </select>
+          <div class="tags-pessoas">
+            <span v-for="pid in (editando.pessoasVinculadas||[])" :key="pid" class="tag-pessoa">
+              {{ nomePorId(pid) }} <span class="x" @click="removerPessoa(pid)">×</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="fld">
+          <label>Ações (cada uma com check individual)</label>
+          <div v-for="(a,k) in editando.acoes" :key="k" class="acao-item">
+            <div class="acao-row">
+              <input type="checkbox" class="chk" :checked="a.status==='Concluído'" @change="toggleAcao(k,$event)">
+              <input type="text" v-model="a.descricao" placeholder="Descrição da ação">
+              <input type="text" v-model="a.responsavel" placeholder="Resp." style="width:110px">
+              <input type="date" v-model="a.prazo">
+              <button class="del" @click="removerAcao(k)" title="Remover">×</button>
+            </div>
+          </div>
+          <button class="acao-add" @click="adicionarAcao">+ Adicionar Ação</button>
+        </div>
+
+        <div class="fld-row">
+          <div class="fld">
+            <label>Status Geral</label>
+            <select v-model="editando.status">
+              <option>Aberto</option><option>Em andamento</option><option>Concluído</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Próxima Revisão</label>
+            <input type="date" v-model="editando.proximaRevisao">
+          </div>
+        </div>
+
+        <div class="fld">
+          <label>Anexos (links externos: Drive, SharePoint, etc.)</label>
+          <div v-for="(an,k) in editando.anexos" :key="'an'+k" class="anexo-item">
+            <a :href="an.url" target="_blank">📎 {{ an.nome }}</a>
+            <button class="del" @click="removerAnexo(k)">×</button>
+          </div>
+          <div class="anexo-add">
+            <input type="text" v-model="novoAnexoNome" placeholder="Nome do arquivo">
+            <input type="text" v-model="novoAnexoUrl" placeholder="https://...">
+            <button class="btn btn-ghost btn-sm" @click="adicionarAnexo">Adicionar</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-f">
+        <button v-if="editando.id" class="btn btn-danger btn-sm" @click="excluirPlano">Excluir</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-ghost" @click="fecharModal">Cancelar</button>
+        <button class="btn btn-primary" @click="salvarPlano">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Equipe de <b style="color:var(--gold)">Business Partners</b> &middot; Gabi, Marina &amp; Sara &middot; Valor 2026
+</div>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAxwiOiVXgBNPGWTSOAl9p_BqKgtb9yZFc",
+  authDomain: "crm-regua.firebaseapp.com",
+  databaseURL: "https://crm-regua-default-rtdb.firebaseio.com",
+  projectId: "crm-regua",
+  storageBucket: "crm-regua.firebasestorage.app",
+  messagingSenderId: "333904372979",
+  appId: "1:333904372979:web:39b4c21b71f54f8c9c8386"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const TEMAS = ["Performance","Retenção","Clima","Desenvolvimento","Sucessão","Comportamento","Outro"];
+const TIPOS = ["Fórum de Gente","Acompanhamento com Gestor","Acompanhamento com Líder","Acompanhamento Pontual"];
+const UNIDADES = ["BHZ","RJO","BRU","SP","BSB","GYN","VIX","NEX","LIN","CAC"];
+
+createApp({
+  data(){return{
+    loading:true,
+    planos:[],
+    contatos:[],
+    modalAberto:false,
+    editando:this.planoVazio(),
+    novoAnexoNome:"",
+    novoAnexoUrl:"",
+    fBp:"",fUnidade:"",fTema:"",fStatus:"",fBusca:"",
+    TEMAS,TIPOS,
+    unidadesAll:UNIDADES
+  }},
+  async mounted(){
+    db.ref('planos').on('value',snap=>{
+      const v=snap.val()||{};
+      this.planos=Object.entries(v).map(([id,p])=>({...p,id}));
+      this.loading=false;
+    });
+    // Carregar contatos da régua para vinculação
+    db.ref('contatos').once('value').then(snap=>{
+      const v=snap.val()||{};
+      this.contatos=Object.values(v);
+    });
+  },
+  computed:{
+    nomeMesAtual(){
+      return ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][new Date().getMonth()];
+    },
+    contatosDisponiveis(){
+      const ja=new Set(this.editando.pessoasVinculadas||[]);
+      return this.contatos.filter(c=>!ja.has(c.id)).sort((a,b)=>a.nome.localeCompare(b.nome));
+    },
+    kpis(){
+      const hoje=new Date(); const mes=hoje.getMonth(); const ano=hoje.getFullYear();
+      let aberto=0,andamento=0,concluidoMes=0,atrasado=0,total=0;
+      this.planos.forEach(p=>{
+        const ef=this.statusEfetivo(p);
+        if(ef==='Aberto')aberto++;
+        else if(ef==='Em andamento')andamento++;
+        else if(ef==='Atrasado')atrasado++;
+        if(p.status==='Concluído' && p.data){
+          const d=new Date(p.data);
+          if(d.getMonth()===mes && d.getFullYear()===ano) concluidoMes++;
+        }
+        if(p.data && p.data.startsWith('2026')) total++;
+      });
+      return{aberto,andamento,concluidoMes,atrasado,total};
+    },
+    planosFiltrados(){
+      const q=this.fBusca.toLowerCase().trim();
+      return this.planos.filter(p=>{
+        if(this.fBp && p.bpCriador!==this.fBp)return false;
+        if(this.fUnidade && p.unidade!==this.fUnidade)return false;
+        if(this.fTema && p.tema!==this.fTema)return false;
+        if(this.fStatus && this.statusEfetivo(p)!==this.fStatus)return false;
+        if(q){
+          const txt=((p.gestor||'')+' '+(p.contexto||'')+' '+(p.tema||'')).toLowerCase();
+          if(!txt.includes(q))return false;
+        }
+        return true;
+      }).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+    },
+    proximasRevisoes(){
+      const hoje=new Date(); hoje.setHours(0,0,0,0);
+      const limite=new Date(hoje); limite.setDate(limite.getDate()+14);
+      return this.planos.filter(p=>{
+        if(!p.proximaRevisao || p.status==='Concluído')return false;
+        const d=new Date(p.proximaRevisao);
+        return d>=hoje && d<=limite;
+      }).sort((a,b)=>a.proximaRevisao.localeCompare(b.proximaRevisao));
+    },
+    temasComContagem(){
+      const m={};this.planos.forEach(p=>{m[p.tema]=(m[p.tema]||0)+1});
+      return TEMAS.map(t=>({nome:t,count:m[t]||0})).filter(x=>x.count>0);
+    },
+    unidadesComContagem(){
+      const m={};this.planos.forEach(p=>{if(p.unidade)m[p.unidade]=(m[p.unidade]||0)+1});
+      return Object.entries(m).map(([nome,count])=>({nome,count})).sort((a,b)=>b.count-a.count);
+    }
+  },
+  methods:{
+    planoVazio(){
+      const hoje=new Date().toISOString().slice(0,10);
+      return{id:null,data:hoje,tipo:"Acompanhamento com Gestor",unidade:"",gestor:"",tema:"Performance",
+        contexto:"",bpCriador:"Gabi",status:"Aberto",proximaRevisao:"",
+        pessoasVinculadas:[],acoes:{},anexos:{}};
+    },
+    formatData(d){if(!d)return'—';const[a,m,di]=d.split('-');return di+'/'+m+'/'+a;},
+    diasAte(d){const h=new Date();h.setHours(0,0,0,0);const t=new Date(d);const diff=Math.round((t-h)/86400000);if(diff===0)return'hoje';if(diff===1)return'amanhã';if(diff<0)return Math.abs(diff)+'d atrás';return'em '+diff+'d';},
+    nomePorId(id){const c=this.contatos.find(x=>x.id===id);return c?c.nome:id;},
+    statusEfetivo(p){
+      if(p.status==='Concluído')return'Concluído';
+      if(p.proximaRevisao){
+        const h=new Date();h.setHours(0,0,0,0);
+        const r=new Date(p.proximaRevisao);
+        if(r<h)return'Atrasado';
+      }
+      return p.status||'Aberto';
+    },
+    badgeStatus(p){
+      const s=this.statusEfetivo(p);
+      return{Aberto:'bdg-aberto','Em andamento':'bdg-andamento',Concluído:'bdg-concluido',Atrasado:'bdg-atrasado'}[s];
+    },
+    progTotal(p){return Object.keys(p.acoes||{}).length;},
+    progDone(p){return Object.values(p.acoes||{}).filter(a=>a.status==='Concluído').length;},
+    progPct(p){const t=this.progTotal(p);return t?Math.round(this.progDone(p)/t*100):0;},
+    progClass(p){const pct=this.progPct(p);if(pct>=80)return'';if(pct>=40)return'warn';return'bad';},
+    abrirNovo(){this.editando=this.planoVazio();this.modalAberto=true;},
+    abrirEdicao(p){
+      this.editando=JSON.parse(JSON.stringify({
+        ...this.planoVazio(),...p,
+        pessoasVinculadas:p.pessoasVinculadas||[],
+        acoes:p.acoes||{},anexos:p.anexos||{}
+      }));
+      this.modalAberto=true;
+    },
+    fecharModal(){this.modalAberto=false;this.novoAnexoNome="";this.novoAnexoUrl="";},
+    addPessoa(e){
+      const v=e.target.value;if(!v)return;
+      if(!this.editando.pessoasVinculadas)this.editando.pessoasVinculadas=[];
+      this.editando.pessoasVinculadas.push(v);
+      e.target.value="";
+    },
+    removerPessoa(id){this.editando.pessoasVinculadas=this.editando.pessoasVinculadas.filter(x=>x!==id);},
+    adicionarAcao(){
+      const k='a'+Date.now()+Math.floor(Math.random()*1000);
+      if(!this.editando.acoes)this.editando.acoes={};
+      this.editando.acoes[k]={descricao:"",responsavel:"",prazo:"",status:"Aberto"};
+    },
+    toggleAcao(k,e){
+      this.editando.acoes[k].status=e.target.checked?'Concluído':'Aberto';
+      if(e.target.checked)this.editando.acoes[k].concluidoEm=new Date().toISOString();
+    },
+    removerAcao(k){delete this.editando.acoes[k];this.editando={...this.editando};},
+    adicionarAnexo(){
+      if(!this.novoAnexoNome.trim()||!this.novoAnexoUrl.trim())return;
+      const k='x'+Date.now();
+      if(!this.editando.anexos)this.editando.anexos={};
+      this.editando.anexos[k]={nome:this.novoAnexoNome.trim(),url:this.novoAnexoUrl.trim(),uploadEm:new Date().toISOString()};
+      this.novoAnexoNome="";this.novoAnexoUrl="";
+    },
+    removerAnexo(k){delete this.editando.anexos[k];this.editando={...this.editando};},
+    async salvarPlano(){
+      if(!this.editando.gestor||!this.editando.gestor.trim()){alert('Informe o gestor/líder.');return;}
+      // Auto-status baseado em ações
+      if(this.editando.status!=='Concluído'){
+        const total=Object.keys(this.editando.acoes||{}).length;
+        const done=Object.values(this.editando.acoes||{}).filter(a=>a.status==='Concluído').length;
+        if(total>0 && done>0 && done<total) this.editando.status='Em andamento';
+        if(total>0 && done===total) this.editando.status='Concluído';
+      }
+      const id=this.editando.id||('p'+Date.now());
+      const dados={...this.editando,id,atualizadoEm:new Date().toISOString()};
+      if(!dados.criadoEm)dados.criadoEm=new Date().toISOString();
+      delete dados.id;
+      // limpa undefined
+      Object.keys(dados).forEach(k=>{if(dados[k]===undefined)delete dados[k]});
+      await db.ref('planos/'+id).set(dados);
+      this.fecharModal();
+    },
+    async excluirPlano(){
+      if(!confirm('Excluir este plano? Esta ação não pode ser desfeita.'))return;
+      await db.ref('planos/'+this.editando.id).remove();
+      this.fecharModal();
+    },
+    limparFiltros(){this.fBp=this.fUnidade=this.fTema=this.fStatus=this.fBusca="";}
+  }
+}).mount('#app');
+</script>
+<script>
+(function(){
+  document.body.style.opacity='0';
+  firebase.auth().onAuthStateChanged(u=>{
+    if(!u){window.location.href='login.html';return;}
+    document.body.style.opacity='1';
+  });
+})();
+</script>
+</body>
+</html>

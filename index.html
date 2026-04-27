@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal BP &middot; Comercial</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<style>
+:root{
+  --bg:#F5EDD7;--card:#FFFFFF;--navy:#1B3A6B;--navy2:#2D6A9F;
+  --gold:#C4922A;--orange:#E87722;--teal:#0B6E8C;
+  --green:#1A6B3C;--red:#9B1C1C;--text:#1E293B;--muted:#64748B;
+  --border:#D4C5A9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:var(--navy);padding:24px 32px;box-shadow:0 3px 16px rgba(0,0,0,.25)}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.hdr h1{color:#fff;font-size:19px;font-weight:700;letter-spacing:.3px}
+.hdr h1 em{color:#F5C842;font-style:normal}
+.hdr-sub{color:rgba(255,255,255,.55);font-size:10.5px;margin-top:2px}
+.hdr-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+            color:#F5C842;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;white-space:nowrap}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+.subtitle{text-align:center;margin-bottom:36px}
+.subtitle h2{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:6px}
+.subtitle p{font-size:13px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:1080px;width:100%}
+.card{background:var(--card);border-radius:10px;padding:28px 24px;
+      box-shadow:0 1px 4px rgba(27,58,107,.08);border:1px solid var(--border);
+      text-decoration:none;color:inherit;transition:all .2s;position:relative;overflow:hidden;
+      border-top:3px solid var(--navy)}
+.card:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(27,58,107,.15);border-top-color:var(--gold)}
+.card.accent-gold{border-top-color:var(--gold)}
+.card.accent-teal{border-top-color:var(--teal)}
+.card-icon{font-size:32px;margin-bottom:14px;display:block}
+.card-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.card-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.card-arrow{position:absolute;top:24px;right:20px;font-size:18px;color:var(--border);transition:all .2s}
+.card:hover .card-arrow{color:var(--gold);transform:translateX(3px)}
+.card-tag{display:inline-block;margin-top:14px;font-size:9.5px;font-weight:700;text-transform:uppercase;
+          letter-spacing:.6px;padding:3px 10px;border-radius:12px}
+.tag-crm{background:#DCFCE7;color:#166534}
+.tag-analytics{background:#EDE8FD;color:#5B21B6}
+.tag-planos{background:#FFEDD5;color:#9A3412}
+.card.accent-orange{border-top-color:var(--orange)}
+.footer{text-align:center;padding:20px;font-size:10px;color:var(--muted);border-top:1px solid var(--border)}
+.footer b{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <h1>Portal <em>BP</em> &nbsp;&middot;&nbsp; Comercial</h1>
+      <div class="hdr-sub">Ferramentas da equipe de Business Partners &middot; Valor Investimentos</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span id="userLabel" style="color:rgba(255,255,255,.6);font-size:11px"></span>
+      <button onclick="doLogout()" id="btnLogout" style="display:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#F5C842;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;cursor:pointer">Sair</button>
+      <div class="hdr-badge">VALOR INVESTIMENTOS &middot; 2026</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="subtitle">
+    <h2>Painel de Ferramentas</h2>
+    <p>Selecione a ferramenta que deseja acessar</p>
+  </div>
+
+  <div class="cards">
+    <a href="regua.html" class="card accent-gold">
+      <span class="card-icon">&#128202;</span>
+      <span class="card-arrow">&rarr;</span>
+      <div class="card-title">R&eacute;gua de Relacionamento</div>
+      <div class="card-desc">CRM de contatos com o time comercial. Acompanhe status, registre intera&ccedil;&otilde;es e monitore a meta mensal por BP.</div>
+      <span class="card-tag tag-crm">CRM &middot; Tempo Real</span>
+    </a>
+
+    <a href="people-analytics.html" class="card accent-teal">
+      <span class="card-icon">&#128200;</span>
+      <span class="card-arrow">&rarr;</span>
+      <div class="card-title">People Analytics</div>
+      <div class="card-desc">Dashboard anal&iacute;tico da Assessoria de Investimentos. Indicadores, m&eacute;tricas e vis&atilde;o consolidada do time.</div>
+      <span class="card-tag tag-analytics">Analytics &middot; Dashboard</span>
+    </a>
+
+    <a href="planos-acao.html" class="card accent-orange">
+      <span class="card-icon">&#128221;</span>
+      <span class="card-arrow">&rarr;</span>
+      <div class="card-title">Planos de A&ccedil;&atilde;o</div>
+      <div class="card-desc">Registros do f&oacute;rum de gente, acompanhamentos com gestores e l&iacute;deres. Ações com checklist, prazos e anexos.</div>
+      <span class="card-tag tag-planos">RH &middot; Tempo Real</span>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Equipe de <b>Business Partners</b> &middot; Gabi, Marina &amp; Sara &middot; Valor Investimentos 2026
+</div>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAxwiOiVXgBNPGWTSOAl9p_BqKgtb9yZFc",
+  authDomain: "crm-regua.firebaseapp.com",
+  databaseURL: "https://crm-regua-default-rtdb.firebaseio.com",
+  projectId: "crm-regua",
+  storageBucket: "crm-regua.firebasestorage.app",
+  messagingSenderId: "333904372979",
+  appId: "1:333904372979:web:39b4c21b71f54f8c9c8386"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+document.body.style.opacity = '0';
+auth.onAuthStateChanged(user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  document.getElementById('userLabel').textContent = user.email;
+  document.getElementById('btnLogout').style.display = 'inline-block';
+  document.body.style.opacity = '1';
+});
+function doLogout(){ auth.signOut().then(()=> window.location.href='login.html'); }
+</script>
+</body>
+</html>
