@@ -241,7 +241,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 <div id="tab-overview" class="sec on">
   <div class="kpig">
     <div class="kpi"><div class="kl">Headcount Total</div><div class="kv">193</div><div class="ks">Assessores comerciais ativos</div></div>
-    <div class="kpi gold"><div class="kl">Meta Março/26</div><div class="kv">212</div><div class="ks">Gap: <b class="neg">-15</b></div></div>
+    <div class="kpi gold"><div class="kl">Meta Abr/26</div><div class="kv">215</div><div class="ks">Gap: <b class="neg">-5</b></div></div>
     <div class="kpi red"><div class="kl">Saídas 2025</div><div class="kv">45</div><div class="ks">Comercial, ano completo</div></div>
     <div class="kpi red"><div class="kl">Saídas 2026 YTD</div><div class="kv">14</div><div class="ks">Jan–Abr/26</div></div>
     <div class="kpi green"><div class="kl">Retenção 180d (2026)</div><div class="kv">92.9%</div><div class="ks">13/14 ficaram 180+ dias</div></div>
@@ -251,7 +251,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
     <div class="card acc-red"><div class="ct">Saídas por Unidade e Origem — 2026</div><div class="cw"><canvas id="cExitStack"></canvas></div></div>
   </div>
   <div class="pg pg2">
-    <div class="card acc-gold"><div class="ct">Meta Mar/26 vs Atual por Unidade</div><div class="cw"><canvas id="cMeta"></canvas></div></div>
+    <div class="card acc-gold"><div class="ct">Meta Abr/26 vs Atual por Unidade</div><div class="cw"><canvas id="cMeta"></canvas></div></div>
     <div class="card acc-teal"><div class="ct">Entradas vs Saídas por Ano — Histórico Comercial</div><div class="cw"><canvas id="cExitsYear"></canvas></div></div>
   </div>
   <div class="fonte"><b>Fontes:</b> data(17).xlsx (Headcount Comercial RH) · Lista de Usuários 31-03-2026.xlsx</div>
@@ -974,11 +974,11 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
       </div>
       <div class="pdf-body">
         <div class="pdf-kpis">
-          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Headcount Total</div><div class="pdf-kpi-val">197</div><div class="pdf-kpi-sub">Assessores comerciais ativos</div></div>
-          <div class="pdf-kpi gold"><div class="pdf-kpi-lbl">Meta Março/26</div><div class="pdf-kpi-val" style="color:var(--gold)">212</div><div class="pdf-kpi-sub">Meta de contratação</div></div>
-          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Gap Março</div><div class="pdf-kpi-val" style="color:var(--red)">-15</div><div class="pdf-kpi-sub">Abaixo da meta</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Headcount Total</div><div class="pdf-kpi-val">193</div><div class="pdf-kpi-sub">Assessores comerciais ativos</div></div>
+          <div class="pdf-kpi gold"><div class="pdf-kpi-lbl">Meta Abr/26</div><div class="pdf-kpi-val" style="color:var(--gold)">215</div><div class="pdf-kpi-sub">Meta de contratação</div></div>
+          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Gap Abril</div><div class="pdf-kpi-val" style="color:var(--red)">-5</div><div class="pdf-kpi-sub">Abaixo da meta</div></div>
         </div>
-        <div class="pdf-section-title">Meta Mar/26 vs Atual por Unidade</div>
+        <div class="pdf-section-title">Meta Abr/26 vs Atual por Unidade</div>
         <div class="pm-legend">
           <span><span class="pm-leg-dot" style="background:#C4922A;opacity:.5"></span>Meta</span>
           <span><span class="pm-leg-dot" style="background:var(--green)"></span>Atingido</span>
@@ -1036,7 +1036,12 @@ const EXT_DATA=[{"Unidade": "Vitória", "Qtd": 13, "PctUnit": 24.5}, {"Unidade":
 
 /* HC VALOR TOTAL */
 const HC_ANUAL_LABS = ['Dez/22','Dez/23','Dez/24','Dez/25','Abr/26'];
-const HC_ANUAL_VALS = [327, 291, 310, 300, 290];
+const HC_ANUAL_COM  = [227, 218, 234, 218, 210];
+const HC_ANUAL_SUP  = [35,  28,  29,  32,  31];
+const HC_ANUAL_PROD = [26,  21,  25,  26,  25];
+const HC_ANUAL_SEG  = [19,  13,  11,  13,  13];
+const HC_ANUAL_WLT  = [17,   8,   9,   8,   8];
+const HC_ANUAL_OTH  = [3,    3,   2,   3,   3];
 const HCV_LABS = ['Abr/25','Mai/25','Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26','Abr/26'];
 const HCV_TOTAL = [305,305,304,304,309,303,306,303,300,292,295,292,290];
 const HCV_COMERCIAL = [228,228,227,225,225,221,222,221,218,214,217,213,210];
@@ -1227,18 +1232,54 @@ function buildCharts(tab){
       });
   }
   if(tab==='hcvalor'){
-    /* Barras anuais (Dez de cada ano) */
+    /* Barras anuais empilhadas por vertical */
     const ca=document.getElementById('cHcAnual'); if(ca&&!ca._c)
       ca._c=new Chart(ca,{type:'bar',
-        data:{labels:HC_ANUAL_LABS,datasets:[{
-          data:HC_ANUAL_VALS,
-          backgroundColor:HC_ANUAL_LABS.map(l=>l==='Abr/26'?GOLD:NAVY),
-          borderRadius:6,borderSkipped:false}]},
+        data:{labels:HC_ANUAL_LABS,datasets:[
+          {label:'Comercial',         data:HC_ANUAL_COM, backgroundColor:NAVY,              borderRadius:0,stack:'s'},
+          {label:'Suporte ao Negócio',data:HC_ANUAL_SUP, backgroundColor:TEAL,              borderRadius:0,stack:'s'},
+          {label:'Produtos',          data:HC_ANUAL_PROD,backgroundColor:PURPLE,            borderRadius:0,stack:'s'},
+          {label:'Seguridade e Emp.', data:HC_ANUAL_SEG, backgroundColor:ORANGE,            borderRadius:0,stack:'s'},
+          {label:'Wealth',            data:HC_ANUAL_WLT, backgroundColor:GREEN,             borderRadius:0,stack:'s'},
+          {label:'Outros',            data:HC_ANUAL_OTH, backgroundColor:'#BFAC8A',         borderRadius:4,stack:'s'},
+        ]},
         options:{...defs,
-          layout:{padding:{top:24}},
-          plugins:{...defs.plugins,
-            datalabels:{...DL_DEFAULT,anchor:'end',align:'end',font:{size:13,weight:'bold'}}},
-          scales:{x:scaleX,y:{...scaleY,suggestedMin:270,suggestedMax:340}}}
+          layout:{padding:{top:28}},
+          plugins:{
+            legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:12}},
+            tooltip:{},
+            datalabels:{
+              color:'#fff',font:{size:9,weight:'bold'},
+              formatter:(v)=>(!v||v===0)?'':v,
+              anchor:'center',align:'center',
+              display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=8,
+              // Show total on top of last dataset
+              listeners:{},
+              afterDatasetsDraw: undefined
+            }
+          },
+          scales:{
+            x:{...scaleX,stacked:true},
+            y:{...scaleY,stacked:true,suggestedMin:0}
+          }
+        },
+        plugins:[{
+          id:'totalLabel',
+          afterDatasetsDraw(chart){
+            const {ctx,data}=chart;
+            const totals=data.labels.map((_,i)=>data.datasets.reduce((s,ds)=>s+(ds.data[i]||0),0));
+            ctx.save();
+            ctx.font='bold 12px sans-serif';
+            ctx.fillStyle='#1B3A6B';
+            ctx.textAlign='center';
+            data.labels.forEach((_,i)=>{
+              const meta=chart.getDatasetMeta(data.datasets.length-1);
+              const bar=meta.data[i];
+              if(bar) ctx.fillText(totals[i], bar.x, bar.y-6);
+            });
+            ctx.restore();
+          }
+        }]
       });
     /* Linha de evolução total */
     const c1=document.getElementById('cHcValorLine'); if(c1&&!c1._c)
