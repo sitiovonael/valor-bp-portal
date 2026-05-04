@@ -241,7 +241,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 <div id="tab-overview" class="sec on">
   <div class="kpig">
     <div class="kpi"><div class="kl">Headcount Total</div><div class="kv">193</div><div class="ks">Assessores comerciais ativos</div></div>
-    <div class="kpi gold"><div class="kl">Meta Abr/26</div><div class="kv">215</div><div class="ks">Gap: <b class="neg">-5</b></div></div>
+    <div class="kpi gold"><div class="kl">Meta Abr/26</div><div class="kv">215</div><div class="ks">Gap: <b class="neg">-22</b></div></div>
     <div class="kpi red"><div class="kl">Saídas 2025</div><div class="kv">45</div><div class="ks">Comercial, ano completo</div></div>
     <div class="kpi red"><div class="kl">Saídas 2026 YTD</div><div class="kv">14</div><div class="ks">Jan–Abr/26</div></div>
     <div class="kpi green"><div class="kl">Retenção 180d (2026)</div><div class="kv">92.9%</div><div class="ks">13/14 ficaram 180+ dias</div></div>
@@ -275,6 +275,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 <tr><td>Goiânia</td><td class="nr2"><b>7</b></td><td class="pr">3.6%</td><td class="bc"><div class="mb" style="width:13%;background:#1B3A6B"></div></td></tr>
 <tr><td>Cachoeiro</td><td class="nr2"><b>6</b></td><td class="pr">3.1%</td><td class="bc"><div class="mb" style="width:12%;background:#1B3A6B"></div></td></tr>
 <tr><td>Linhares</td><td class="nr2"><b>3</b></td><td class="pr">1.6%</td><td class="bc"><div class="mb" style="width:6%;background:#1B3A6B"></div></td></tr>
+<tr><td>Nexus <span class="ntag">Nexus</span></td><td class="nr2"><b>16</b></td><td class="pr">8.3%</td><td class="bc"><div class="mb" style="width:31%;background:#1B3A6B"></div></td></tr>
 </tbody>
         <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">193</td><td class="pr">100%</td><td></td></tr></tfoot>
       </table>
@@ -310,13 +311,13 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
   <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:700px">
     <div class="kpi"><div class="kl">HC Dez/25</div><div class="kv">204</div><div class="ks">baseline</div></div>
     <div class="kpi gold"><div class="kl">Meta Abr/26</div><div class="kv">215</div><div class="ks">+11 vs Dez/25</div></div>
-    <div class="kpi"><div class="kl">Atual Abr/26</div><div class="kv">210</div><div class="ks">realizado</div></div>
-    <div class="kpi red"><div class="kl">Gap Abril</div><div class="kv">-5</div><div class="ks">abaixo da meta</div></div>
+    <div class="kpi"><div class="kl">Atual Abr/26</div><div class="kv">193</div><div class="ks">realizado</div></div>
+    <div class="kpi red"><div class="kl">Gap Abril</div><div class="kv">-22</div><div class="ks">abaixo da meta</div></div>
   </div>
   <div class="note">
     <b>Meta Anual:</b> crescimento líquido de <b>+30</b> em 2026. Meta final: <b>234</b>.
-    Variação YTD: <b class="pos">+6</b>.
-    Faltam <b>24</b> adições líquidas nos próximos 8 meses.
+    Variação YTD: <b class="neg">-11</b>.
+    Faltam <b>41</b> adições líquidas nos próximos 8 meses.
   </div>
   <div class="card" style="margin-top:20px">
     <div class="ct">Meta por Unidade — Abril 2026</div>
@@ -955,6 +956,19 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
       <button class="pdf-close" onclick="closePDF()">✕</button>
     </div>
     <div class="pdf-modal-actions">
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Selecionar seções para exportar:</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;user-select:none">
+            <input type="checkbox" id="chk-p1" checked onchange="togglePDFPage('print-p1',this.checked)" style="width:14px;height:14px;cursor:pointer">
+            📊 Headcount &amp; Metas por Unidade
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;user-select:none">
+            <input type="checkbox" id="chk-p2" checked onchange="togglePDFPage('print-p2',this.checked)" style="width:14px;height:14px;cursor:pointer">
+            📉 Saídas Comerciais 2026
+          </label>
+        </div>
+      </div>
       <button class="pdf-print-btn" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
       <div class="pdf-note-txt">Use o diálogo de impressão do navegador e selecione "Salvar como PDF" como destino.</div>
     </div>
@@ -976,7 +990,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
         <div class="pdf-kpis">
           <div class="pdf-kpi"><div class="pdf-kpi-lbl">Headcount Total</div><div class="pdf-kpi-val">193</div><div class="pdf-kpi-sub">Assessores comerciais ativos</div></div>
           <div class="pdf-kpi gold"><div class="pdf-kpi-lbl">Meta Abr/26</div><div class="pdf-kpi-val" style="color:var(--gold)">215</div><div class="pdf-kpi-sub">Meta de contratação</div></div>
-          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Gap Abril</div><div class="pdf-kpi-val" style="color:var(--red)">-5</div><div class="pdf-kpi-sub">Abaixo da meta</div></div>
+          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Gap Abril</div><div class="pdf-kpi-val" style="color:var(--red)">-22</div><div class="pdf-kpi-sub">Abaixo da meta</div></div>
         </div>
         <div class="pdf-section-title">Meta Abr/26 vs Atual por Unidade</div>
         <div class="pm-legend">
@@ -984,7 +998,19 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
           <span><span class="pm-leg-dot" style="background:var(--green)"></span>Atingido</span>
           <span><span class="pm-leg-dot" style="background:var(--red)"></span>Abaixo da meta</span>
         </div>
-        <table style="width:100%;border:none"><tr class="pm-row"><td class="pm-unit">Vitória</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:92%"><span>55</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:88%;background:#9B1C1C"><span>53</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr><tr class="pm-row"><td class="pm-unit">Cachoeiro</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:13%"><span>8</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:10%;background:#9B1C1C"><span>6</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr><tr class="pm-row"><td class="pm-unit">São Paulo</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:55%"><span>33</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:53%;background:#9B1C1C"><span>32</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-1</b></td></tr><tr class="pm-row"><td class="pm-unit">Rio de Janeiro</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:30%"><span>18</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:23%;background:#9B1C1C"><span>14</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-4</b></td></tr><tr class="pm-row"><td class="pm-unit">Brasília</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:50%"><span>30</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:43%;background:#9B1C1C"><span>26</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-4</b></td></tr><tr class="pm-row"><td class="pm-unit">Goiânia</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:15%"><span>9</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:13%;background:#9B1C1C"><span>8</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-1</b></td></tr><tr class="pm-row"><td class="pm-unit">Belo Horizonte</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:38%"><span>23</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:35%;background:#9B1C1C"><span>21</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr><tr class="pm-row"><td class="pm-unit">Brumadinho</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:12%"><span>7</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:13%;background:#1A6B3C"><span>8</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>+1</b></td></tr><tr class="pm-row"><td class="pm-unit">Nexus</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:30%"><span>18</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:30%;background:#1A6B3C"><span>18</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr><tr class="pm-row"><td class="pm-unit">Linhares</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:5%"><span>3</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:5%;background:#1A6B3C"><span>3</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr><tr class="pm-row"><td class="pm-unit">Farmer</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:13%"><span>8</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:13%;background:#1A6B3C"><span>8</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr></table>
+        <table style="width:100%;border:none">
+<tr class="pm-row"><td class="pm-unit">Vitória</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:100%"><span>56</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:93%;background:#9B1C1C"><span>52</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-4</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Cachoeiro</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:14%"><span>8</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:11%;background:#9B1C1C"><span>6</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">São Paulo</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:59%"><span>33</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:64%;background:#1A6B3C"><span>36</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>+3</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Rio de Janeiro</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:32%"><span>18</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:34%;background:#1A6B3C"><span>19</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>+1</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Brasília</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:55%"><span>31</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:55%;background:#1A6B3C"><span>31</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Goiânia</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:18%"><span>10</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:13%;background:#9B1C1C"><span>7</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-3</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Belo Horizonte</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:41%"><span>23</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:43%;background:#1A6B3C"><span>24</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>+1</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Brumadinho</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:13%"><span>7</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:14%;background:#1A6B3C"><span>8</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>+1</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Nexus</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:32%"><span>18</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:29%;background:#9B1C1C"><span>16</span></div></div></td><td class="pm-gap" style="color:#9B1C1C"><b>-2</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Linhares</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:5%"><span>3</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:5%;background:#1A6B3C"><span>3</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr>
+<tr class="pm-row"><td class="pm-unit">Farmer</td><td class="pm-bars"><div class="pm-bar-wrap"><div class="pm-bar pm-tgt" style="width:14%"><span>8</span></div></div><div class="pm-bar-wrap"><div class="pm-bar pm-act" style="width:14%;background:#1A6B3C"><span>8</span></div></div></td><td class="pm-gap" style="color:#1A6B3C"><b>0</b></td></tr>
+</table>
       </div>
     </div>
 
@@ -1067,6 +1093,16 @@ function openPDF(){
 function closePDF(){
   document.getElementById('pdfModal').classList.remove('open');
   document.body.style.overflow='';
+  // reset checkboxes when closing
+  document.querySelectorAll('#pdfModal input[type=checkbox]').forEach(c=>{
+    c.checked=true;
+    const pg=document.getElementById(c.id.replace('chk-','print-'));
+    if(pg) pg.style.display='';
+  });
+}
+function togglePDFPage(id,show){
+  const el=document.getElementById(id);
+  if(el) el.style.display=show?'':'none';
 }
 document.getElementById('pdfModal').addEventListener('click',function(e){
   if(e.target===this) closePDF();
@@ -1097,8 +1133,8 @@ const DL_DEFAULT={color:'#1B3A6B',font:{size:10,weight:'bold'},formatter:v=>(v==
 const NAVY='#1B3A6B',NAVY2='#2D6A9F',GOLD='#C4922A',ORANGE='#E87722';
 const TEAL='#0B6E8C',RED='#9B1C1C',GREEN='#1A6B3C',PURPLE='#5B21B6';
 
-const UNITS     =["Vitória", "São Paulo", "Brasília", "Belo Horizonte", "Rio de Janeiro", "Brumadinho", "Farmer", "Goiânia", "Cachoeiro", "Linhares"];
-const HC_VALS   =[52, 36, 31, 24, 19, 8, 8, 7, 6, 3];
+const UNITS     =["Vitória", "São Paulo", "Brasília", "Belo Horizonte", "Rio de Janeiro", "Brumadinho", "Farmer", "Goiânia", "Cachoeiro", "Linhares", "Nexus"];
+const HC_VALS   =[52, 36, 31, 24, 19, 8, 8, 7, 6, 3, 16];
 const NIVEL_LABS=["Júnior", "Pleno", "Digital/Nexus", "Master", "Sênior I", "Líder", "Part-Time", "Investor", "Líder Full", "Formação", "Gestor", "Sênior II"];
 const NIVEL_VALS=[63, 45, 18, 14, 13, 12, 9, 8, 5, 4, 4, 2];
 const EA_LABS   =[2020, 2021, 2022, 2023, 2024, 2025, 2026];
@@ -1115,7 +1151,7 @@ const ADM_L     =[2008, 2011, 2012, 2014, 2015, 2016, 2018, 2019, 2020, 2021, 20
 const ADM_V     =[1, 1, 1, 1, 1, 4, 13, 18, 10, 22, 40, 24, 29, 24, 4];
 const META_U    =["Vitória", "Cachoeiro", "São Paulo", "Rio de Janeiro", "Brasília", "Goiânia", "Belo Horizonte", "Brumadinho", "Nexus", "Linhares", "Farmer"];
 const META_TGT  =[56, 8, 33, 18, 31, 10, 23, 7, 18, 3, 8];
-const META_ACT  =[52, 6, 36, 17, 31, 7, 24, 8, 18, 3, 8];
+const META_ACT  =[52, 6, 36, 19, 31, 7, 24, 8, 16, 3, 8];
 const STK_U     =["Brasília", "Goiânia", "São Paulo", "Rio de Janeiro", "Nexus", "Belo Horizonte", "Vitória", "Cachoeiro"];
 const STK_VOL   =[0, 0, 1, 0, 0, 1, 1, 0];
 const STK_INV   =[3, 2, 1, 1, 1, 0, 0, 0];
