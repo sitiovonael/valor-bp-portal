@@ -240,11 +240,11 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 <!-- ═══ VISÃO GERAL ═══ -->
 <div id="tab-overview" class="sec on">
   <div class="kpig">
-    <div class="kpi"><div class="kl">Headcount Total</div><div class="kv">197</div><div class="ks">Assessores comerciais ativos</div></div>
+    <div class="kpi"><div class="kl">Headcount Total</div><div class="kv">193</div><div class="ks">Assessores comerciais ativos</div></div>
     <div class="kpi gold"><div class="kl">Meta Março/26</div><div class="kv">212</div><div class="ks">Gap: <b class="neg">-15</b></div></div>
     <div class="kpi red"><div class="kl">Saídas 2025</div><div class="kv">45</div><div class="ks">Comercial, ano completo</div></div>
-    <div class="kpi red"><div class="kl">Saídas 2026 YTD</div><div class="kv">11</div><div class="ks">Jan–Mar 2026</div></div>
-    <div class="kpi green"><div class="kl">Retenção 180d (2026)</div><div class="kv">100.0%</div><div class="ks">11/11 ficaram 180+ dias</div></div>
+    <div class="kpi red"><div class="kl">Saídas 2026 YTD</div><div class="kv">14</div><div class="ks">Jan–Abr/26</div></div>
+    <div class="kpi green"><div class="kl">Retenção 180d (2026)</div><div class="kv">92.9%</div><div class="ks">13/14 ficaram 180+ dias</div></div>
   </div>
   <div class="pg pg2">
     <div class="card"><div class="ct">Headcount por Unidade</div><div class="cw"><canvas id="cHcUnit"></canvas></div></div>
@@ -259,31 +259,41 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 
 <!-- ═══ HEADCOUNT ═══ -->
 <div id="tab-headcount" class="sec">
-  <div class="stitle">Headcount Comercial — Março 2026</div>
+  <div class="stitle">Headcount Comercial — Abril 2026</div>
   <div class="pg pg31">
     <div class="card">
       <div class="ct">Por Unidade</div>
       <table><thead><tr><th>Unidade</th><th class="nc2">HC</th><th class="pr">%</th><th class="bc"></th></tr></thead>
-        <tbody><tr ><td>Vitória</td><td class="nr2"><b>53</b></td><td class="pr">26.9%</td><td class="bc"><div class="mb" style="width:100%;background:#1B3A6B"></div></td></tr>
-<tr ><td>São Paulo</td><td class="nr2"><b>32</b></td><td class="pr">16.2%</td><td class="bc"><div class="mb" style="width:60%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Brasília</td><td class="nr2"><b>26</b></td><td class="pr">13.2%</td><td class="bc"><div class="mb" style="width:49%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Belo Horizonte</td><td class="nr2"><b>21</b></td><td class="pr">10.7%</td><td class="bc"><div class="mb" style="width:40%;background:#1B3A6B"></div></td></tr>
-<tr><td>Nexus</td><td class="nr2"><b>18</b></td><td class="pr">9.1%</td><td class="bc"><div class="mb" style="width:34%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Rio de Janeiro</td><td class="nr2"><b>14</b></td><td class="pr">7.1%</td><td class="bc"><div class="mb" style="width:26%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Brumadinho</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Goiânia</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Farmer</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Cachoeiro</td><td class="nr2"><b>6</b></td><td class="pr">3.0%</td><td class="bc"><div class="mb" style="width:11%;background:#1B3A6B"></div></td></tr>
-<tr ><td>Linhares</td><td class="nr2"><b>3</b></td><td class="pr">1.5%</td><td class="bc"><div class="mb" style="width:6%;background:#1B3A6B"></div></td></tr>
+        <tbody>
+<tr><td>Vitória</td><td class="nr2"><b>52</b></td><td class="pr">26.9%</td><td class="bc"><div class="mb" style="width:100%;background:#1B3A6B"></div></td></tr>
+<tr><td>São Paulo</td><td class="nr2"><b>36</b></td><td class="pr">18.7%</td><td class="bc"><div class="mb" style="width:69%;background:#1B3A6B"></div></td></tr>
+<tr><td>Brasília</td><td class="nr2"><b>31</b></td><td class="pr">16.1%</td><td class="bc"><div class="mb" style="width:60%;background:#1B3A6B"></div></td></tr>
+<tr><td>Belo Horizonte</td><td class="nr2"><b>24</b></td><td class="pr">12.4%</td><td class="bc"><div class="mb" style="width:46%;background:#1B3A6B"></div></td></tr>
+<tr><td>Rio de Janeiro</td><td class="nr2"><b>19</b></td><td class="pr">9.8%</td><td class="bc"><div class="mb" style="width:37%;background:#1B3A6B"></div></td></tr>
+<tr><td>Brumadinho</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
+<tr><td>Farmer</td><td class="nr2"><b>8</b></td><td class="pr">4.1%</td><td class="bc"><div class="mb" style="width:15%;background:#1B3A6B"></div></td></tr>
+<tr><td>Goiânia</td><td class="nr2"><b>7</b></td><td class="pr">3.6%</td><td class="bc"><div class="mb" style="width:13%;background:#1B3A6B"></div></td></tr>
+<tr><td>Cachoeiro</td><td class="nr2"><b>6</b></td><td class="pr">3.1%</td><td class="bc"><div class="mb" style="width:12%;background:#1B3A6B"></div></td></tr>
+<tr><td>Linhares</td><td class="nr2"><b>3</b></td><td class="pr">1.6%</td><td class="bc"><div class="mb" style="width:6%;background:#1B3A6B"></div></td></tr>
 </tbody>
-        <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">197</td><td class="pr">100%</td><td></td></tr></tfoot>
+        <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">193</td><td class="pr">100%</td><td></td></tr></tfoot>
       </table>
     </div>
     <div class="card acc-teal">
       <div class="ct">Por Nível</div>
       <table><thead><tr><th>Nível</th><th class="nc2">HC</th><th class="pr">%</th></tr></thead>
-        <tbody><tr><td>Júnior</td><td class='nc2'><b>63</b></td><td class='pr'>32.0%</td></tr><tr><td>Pleno</td><td class='nc2'><b>45</b></td><td class='pr'>22.8%</td></tr><tr><td>Digital/Nexus</td><td class='nc2'><b>18</b></td><td class='pr'>9.1%</td></tr><tr><td>Master</td><td class='nc2'><b>14</b></td><td class='pr'>7.1%</td></tr><tr><td>Sênior I</td><td class='nc2'><b>13</b></td><td class='pr'>6.6%</td></tr><tr><td>Líder</td><td class='nc2'><b>12</b></td><td class='pr'>6.1%</td></tr><tr><td>Part-Time</td><td class='nc2'><b>9</b></td><td class='pr'>4.6%</td></tr><tr><td>Investor</td><td class='nc2'><b>8</b></td><td class='pr'>4.1%</td></tr><tr><td>Líder Full</td><td class='nc2'><b>5</b></td><td class='pr'>2.5%</td></tr><tr><td>Formação</td><td class='nc2'><b>4</b></td><td class='pr'>2.0%</td></tr><tr><td>Gestor</td><td class='nc2'><b>4</b></td><td class='pr'>2.0%</td></tr><tr><td>Sênior II</td><td class='nc2'><b>2</b></td><td class='pr'>1.0%</td></tr></tbody>
-        <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">197</td><td class="pr">100%</td></tr></tfoot>
+        <tbody>
+<tr><td>Segmentado</td><td class='nc2'><b>116</b></td><td class='pr'>55.2%</td></tr>
+<tr><td>Líder</td><td class='nc2'><b>17</b></td><td class='pr'>8.1%</td></tr>
+<tr><td>Digital</td><td class='nc2'><b>16</b></td><td class='pr'>7.6%</td></tr>
+<tr><td>Master</td><td class='nc2'><b>14</b></td><td class='pr'>6.7%</td></tr>
+<tr><td>Part-Time</td><td class='nc2'><b>9</b></td><td class='pr'>4.3%</td></tr>
+<tr><td>Investor</td><td class='nc2'><b>8</b></td><td class='pr'>3.8%</td></tr>
+<tr><td>Formação</td><td class='nc2'><b>6</b></td><td class='pr'>2.9%</td></tr>
+<tr><td>Gestor</td><td class='nc2'><b>4</b></td><td class='pr'>1.9%</td></tr>
+<tr><td>Líder Digital</td><td class='nc2'><b>3</b></td><td class='pr'>1.4%</td></tr>
+</tbody>
+        <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">193</td><td class="pr">100%</td></tr></tfoot>
       </table>
     </div>
   </div>
@@ -291,46 +301,46 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
     <div class="ct">Contratações por Ano (Assessores Ativos Hoje)</div>
     <div class="cw short"><canvas id="cAdm"></canvas></div>
   </div>
-  <div class="fonte"><b>Fonte:</b> data(17).xlsx · Tipo AAI RH = Comercial</div>
+  <div class="fonte"><b>Fonte:</b> data(16).xlsx · Tipo AAI RH = Comercial</div>
 </div>
 
 <!-- ═══ METAS ═══ -->
 <div id="tab-metas" class="sec">
-  <div class="stitle">Metas de Contratação — 1º Trimestre 2026</div>
+  <div class="stitle">Metas de Contratação — Jan–Abr 2026</div>
   <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:700px">
     <div class="kpi"><div class="kl">HC Dez/25</div><div class="kv">204</div><div class="ks">baseline</div></div>
-    <div class="kpi gold"><div class="kl">Meta Mar/26</div><div class="kv">212</div><div class="ks">+8 vs Dez/25</div></div>
-    <div class="kpi"><div class="kl">Atual Mar/26</div><div class="kv">197</div><div class="ks">realizado</div></div>
-    <div class="kpi red"><div class="kl">Gap Março</div><div class="kv">-15</div><div class="ks">abaixo da meta</div></div>
+    <div class="kpi gold"><div class="kl">Meta Abr/26</div><div class="kv">215</div><div class="ks">+11 vs Dez/25</div></div>
+    <div class="kpi"><div class="kl">Atual Abr/26</div><div class="kv">210</div><div class="ks">realizado</div></div>
+    <div class="kpi red"><div class="kl">Gap Abril</div><div class="kv">-5</div><div class="ks">abaixo da meta</div></div>
   </div>
   <div class="note">
     <b>Meta Anual:</b> crescimento líquido de <b>+30</b> em 2026. Meta final: <b>234</b>.
-    Variação YTD: <b class="neg">-7</b>.
-    Precisamos de <b class="neg">37</b> adições líquidas nos próximos 9 meses.
+    Variação YTD: <b class="pos">+6</b>.
+    Faltam <b>24</b> adições líquidas nos próximos 8 meses.
   </div>
   <div class="card" style="margin-top:20px">
-    <div class="ct">Meta por Unidade — Março 2026</div>
-    <table><thead><tr><th>Unidade</th><th class="nc2">HC Dez/25</th><th class="nc2">Meta Jan</th><th class="nc2">Meta Fev</th><th class="nc2">Meta Mar</th><th class="nc2">Atual Mar/26</th><th class="nc2">Gap</th></tr></thead>
-      <tbody><tr><td>Vitória</td><td class='nc2'>54</td><td class='nc2'>55</td><td class='nc2'>55</td><td class='nc2'><b>55</b></td><td class='nc2'><b>53</b></td><td class='nc2 neg'><b>-2</b></td></tr>
-<tr><td>Cachoeiro</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'><b>8</b></td><td class='nc2'><b>6</b></td><td class='nc2 neg'><b>-2</b></td></tr>
-<tr><td>São Paulo</td><td class='nc2'>31</td><td class='nc2'>32</td><td class='nc2'>32</td><td class='nc2'><b>33</b></td><td class='nc2'><b>32</b></td><td class='nc2 neg'><b>-1</b></td></tr>
-<tr><td>Rio de Janeiro</td><td class='nc2'>17</td><td class='nc2'>17</td><td class='nc2'>18</td><td class='nc2'><b>18</b></td><td class='nc2'><b>14</b></td><td class='nc2 neg'><b>-4</b></td></tr>
-<tr><td>Brasília</td><td class='nc2'>29</td><td class='nc2'>29</td><td class='nc2'>30</td><td class='nc2'><b>30</b></td><td class='nc2'><b>26</b></td><td class='nc2 neg'><b>-4</b></td></tr>
-<tr><td>Goiânia</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'><b>9</b></td><td class='nc2'><b>8</b></td><td class='nc2 neg'><b>-1</b></td></tr>
-<tr><td>Belo Horizonte</td><td class='nc2'>22</td><td class='nc2'>22</td><td class='nc2'>22</td><td class='nc2'><b>23</b></td><td class='nc2'><b>21</b></td><td class='nc2 neg'><b>-2</b></td></tr>
-<tr><td>Brumadinho</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'><b>7</b></td><td class='nc2'><b>8</b></td><td class='nc2 pos'><b>+1</b></td></tr>
-<tr><td>Nexus</td><td class='nc2'>17</td><td class='nc2'>17</td><td class='nc2'>18</td><td class='nc2'><b>18</b></td><td class='nc2'><b>18</b></td><td class='nc2 zero'><b>0</b></td></tr>
-<tr><td>Linhares</td><td class='nc2'>3</td><td class='nc2'>3</td><td class='nc2'>3</td><td class='nc2'><b>3</b></td><td class='nc2'><b>3</b></td><td class='nc2 zero'><b>0</b></td></tr>
-<tr><td>Farmer</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'><b>8</b></td><td class='nc2'><b>8</b></td><td class='nc2 zero'><b>0</b></td></tr>
+    <div class="ct">Meta por Unidade — Abril 2026</div>
+    <table><thead><tr><th>Unidade</th><th class="nc2">HC Dez/25</th><th class="nc2">Meta Jan</th><th class="nc2">Meta Fev</th><th class="nc2">Meta Mar</th><th class="nc2">Meta Abr</th><th class="nc2">Atual Abr/26</th><th class="nc2">Gap</th></tr></thead>
+      <tbody><tr><td>Vitória</td><td class='nc2'>54</td><td class='nc2'>55</td><td class='nc2'>55</td><td class='nc2'>55</td><td class='nc2'><b>56</b></td><td class='nc2'><b>52</b></td><td class='nc2 neg'><b>-4</b></td></tr>
+<tr><td>Cachoeiro</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>8</td><td class='nc2'><b>8</b></td><td class='nc2'><b>6</b></td><td class='nc2 neg'><b>-2</b></td></tr>
+<tr><td>São Paulo</td><td class='nc2'>31</td><td class='nc2'>32</td><td class='nc2'>32</td><td class='nc2'>33</td><td class='nc2'><b>33</b></td><td class='nc2'><b>36</b></td><td class='nc2 pos'><b>+3</b></td></tr>
+<tr><td>Rio de Janeiro</td><td class='nc2'>17</td><td class='nc2'>17</td><td class='nc2'>18</td><td class='nc2'>18</td><td class='nc2'><b>18</b></td><td class='nc2'><b>19</b></td><td class='nc2 pos'><b>+1</b></td></tr>
+<tr><td>Brasília</td><td class='nc2'>29</td><td class='nc2'>29</td><td class='nc2'>30</td><td class='nc2'>30</td><td class='nc2'><b>31</b></td><td class='nc2'><b>31</b></td><td class='nc2 zero'><b>0</b></td></tr>
+<tr><td>Goiânia</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'>9</td><td class='nc2'><b>10</b></td><td class='nc2'><b>7</b></td><td class='nc2 neg'><b>-3</b></td></tr>
+<tr><td>Belo Horizonte</td><td class='nc2'>22</td><td class='nc2'>22</td><td class='nc2'>22</td><td class='nc2'>23</td><td class='nc2'><b>23</b></td><td class='nc2'><b>24</b></td><td class='nc2 pos'><b>+1</b></td></tr>
+<tr><td>Brumadinho</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'>7</td><td class='nc2'><b>7</b></td><td class='nc2'><b>8</b></td><td class='nc2 pos'><b>+1</b></td></tr>
+<tr><td>Nexus</td><td class='nc2'>17</td><td class='nc2'>17</td><td class='nc2'>18</td><td class='nc2'>18</td><td class='nc2'><b>18</b></td><td class='nc2'><b>16</b></td><td class='nc2 neg'><b>-2</b></td></tr>
+<tr><td>Linhares</td><td class='nc2'>3</td><td class='nc2'>3</td><td class='nc2'>3</td><td class='nc2'>3</td><td class='nc2'><b>3</b></td><td class='nc2'><b>3</b></td><td class='nc2 zero'><b>0</b></td></tr>
+<tr><td>Farmer</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'>8</td><td class='nc2'><b>8</b></td><td class='nc2'><b>8</b></td><td class='nc2 zero'><b>0</b></td></tr>
 </tbody>
-      <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">204</td><td class="nc2">206</td><td class="nc2">209</td><td class="nc2"><b>212</b></td><td class="nc2"><b>197</b></td><td class="nc2 neg"><b>-15</b></td></tr></tfoot>
+      <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">204</td><td class="nc2">206</td><td class="nc2">209</td><td class="nc2">212</td><td class="nc2"><b>215</b></td><td class="nc2"><b>210</b></td><td class="nc2 neg"><b>-5</b></td></tr></tfoot>
     </table>
   </div>
   <div class="card acc-gold" style="margin-top:20px">
-    <div class="ct">Progresso vs Meta — Março 2026</div>
+    <div class="ct">Progresso vs Meta — Abril 2026</div>
     <div class="cw tall"><canvas id="cMetaBar"></canvas></div>
   </div>
-  <div class="fonte"><b>Meta Q1:</b> fornecida pelo RH · <b>HC atual:</b> data(17).xlsx Mar/26</div>
+  <div class="fonte"><b>Meta Q1:</b> fornecida pelo RH · <b>HC atual:</b> data(16).xlsx Abr/26</div>
 </div>
 
 <!-- ═══ SAÍDAS ═══ -->
@@ -421,8 +431,8 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
   <div class="stitle">⭐ Extraordinários — Talentos a Reter</div>
   
   <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:720px">
-    <div class="kpi gold"><div class="kl">Total Extraordinários</div><div class="kv">58</div><div class="ks">29.4% do time comercial</div></div>
-    <div class="kpi green"><div class="kl">Ainda Ativos</div><div class="kv">58</div><div class="ks">retenção: 100.0%</div></div>
+    <div class="kpi gold"><div class="kl">Total Extraordinários</div><div class="kv">58</div><div class="ks">30.1% do time comercial</div></div>
+    <div class="kpi green"><div class="kl">Ainda Ativos</div><div class="kv">57</div><div class="ks">retenção: 98.3%</div></div>
     <div class="kpi"><div class="kl">Máx. Rodadas</div><div class="kv">1</div><div class="ks">maior continuidade</div></div>
     <div class="kpi teal"><div class="kl">Unidades</div><div class="kv">10</div><div class="ks">com extraordinários</div></div>
   </div>
@@ -430,14 +440,14 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
     <div class="card acc-gold">
       <div class="ct">% Extraordinários por Unidade</div>
       <table><thead><tr><th>Unidade</th><th class="nc2">Qtd</th><th class="nc2">HC</th><th class="nc2">% da Unidade</th><th class="nc2">Maior série</th></tr></thead>
-      <tbody><tr><td>Vitória</td><td class='nc2'><b>13</b></td><td class='nc2'>53</td><td class='nc2'><b style='color:var(--navy)'>24.5%</b></td><td class='nc2'>1 rodada</td></tr>
-<tr><td>Brasília</td><td class='nc2'><b>12</b></td><td class='nc2'>26</td><td class='nc2'><b style='color:var(--navy)'>46.2%</b></td><td class='nc2'>1 rodada</td></tr>
-<tr><td>São Paulo</td><td class='nc2'><b>10</b></td><td class='nc2'>32</td><td class='nc2'><b style='color:var(--navy)'>31.2%</b></td><td class='nc2'>1 rodada</td></tr>
-<tr><td>Nexus</td><td class='nc2'><b>6</b></td><td class='nc2'>18</td><td class='nc2'><b style='color:var(--navy)'>33.3%</b></td><td class='nc2'>1 rodada</td></tr>
-<tr><td>Belo Horizonte</td><td class='nc2'><b>4</b></td><td class='nc2'>21</td><td class='nc2'><b style='color:var(--navy)'>19.0%</b></td><td class='nc2'>1 rodada</td></tr>
+      <tbody><tr><td>Vitória</td><td class='nc2'><b>13</b></td><td class='nc2'>52</td><td class='nc2'><b style='color:var(--navy)'>25.0%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Brasília</td><td class='nc2'><b>12</b></td><td class='nc2'>31</td><td class='nc2'><b style='color:var(--navy)'>38.7%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>São Paulo</td><td class='nc2'><b>9</b></td><td class='nc2'>36</td><td class='nc2'><b style='color:var(--navy)'>25.0%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Nexus</td><td class='nc2'><b>6</b></td><td class='nc2'>16</td><td class='nc2'><b style='color:var(--navy)'>37.5%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Belo Horizonte</td><td class='nc2'><b>4</b></td><td class='nc2'>24</td><td class='nc2'><b style='color:var(--navy)'>16.7%</b></td><td class='nc2'>1 rodada</td></tr>
 <tr><td>Brumadinho</td><td class='nc2'><b>3</b></td><td class='nc2'>8</td><td class='nc2'><b style='color:var(--navy)'>37.5%</b></td><td class='nc2'>1 rodada</td></tr>
-<tr><td>Goiânia</td><td class='nc2'><b>3</b></td><td class='nc2'>8</td><td class='nc2'><b style='color:var(--navy)'>37.5%</b></td><td class='nc2'>1 rodada</td></tr>
-<tr><td>Rio de Janeiro</td><td class='nc2'><b>3</b></td><td class='nc2'>14</td><td class='nc2'><b style='color:var(--navy)'>21.4%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Goiânia</td><td class='nc2'><b>3</b></td><td class='nc2'>7</td><td class='nc2'><b style='color:var(--navy)'>42.9%</b></td><td class='nc2'>1 rodada</td></tr>
+<tr><td>Rio de Janeiro</td><td class='nc2'><b>3</b></td><td class='nc2'>19</td><td class='nc2'><b style='color:var(--navy)'>15.8%</b></td><td class='nc2'>1 rodada</td></tr>
 <tr><td>Linhares</td><td class='nc2'><b>2</b></td><td class='nc2'>3</td><td class='nc2'><b style='color:var(--navy)'>66.7%</b></td><td class='nc2'>1 rodada</td></tr>
 <tr><td>Cachoeiro</td><td class='nc2'><b>2</b></td><td class='nc2'>6</td><td class='nc2'><b style='color:var(--navy)'>33.3%</b></td><td class='nc2'>1 rodada</td></tr>
 </tbody></table>
@@ -738,12 +748,6 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
           <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
         </div>
 <div class="ext-card">
-          <div class="ext-name">Bruno Caldas</div>
-          <div class="ext-unit">São Paulo</div>
-          <div class="ext-rodadas"><span class="rod-dot"></span></div>
-          <div class="ext-label">Extraordinário há <b>1 rodada</b></div>
-        </div>
-<div class="ext-card">
           <div class="ext-name">Fabricio Lima</div>
           <div class="ext-unit">São Paulo</div>
           <div class="ext-rodadas"><span class="rod-dot"></span></div>
@@ -823,13 +827,18 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
     </div>
   </div>
 
-  <div class="pg pg2">
+  <div class="card" style="margin-top:20px">
+    <div class="ct">Evolução Anual — HC Total Valor (Dez de cada ano)</div>
+    <div class="cw"><canvas id="cHcAnual"></canvas></div>
+  </div>
+
+  <div class="pg pg2" style="margin-top:20px">
     <div class="card">
       <div class="ct">Evolução Mensal — HC Total Valor</div>
       <div class="cw"><canvas id="cHcValorLine"></canvas></div>
     </div>
     <div class="card acc-gold">
-      <div class="ct">Composição por Área — Mar/26</div>
+      <div class="ct">Composição por Área — Abr/26</div>
       <div class="cw"><canvas id="cHcValorPie"></canvas></div>
     </div>
   </div>
@@ -1026,6 +1035,8 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 const EXT_DATA=[{"Unidade": "Vitória", "Qtd": 13, "PctUnit": 24.5}, {"Unidade": "Brasília", "Qtd": 12, "PctUnit": 46.2}, {"Unidade": "São Paulo", "Qtd": 10, "PctUnit": 31.2}, {"Unidade": "Nexus", "Qtd": 6, "PctUnit": 33.3}, {"Unidade": "Belo Horizonte", "Qtd": 4, "PctUnit": 19.0}, {"Unidade": "Brumadinho", "Qtd": 3, "PctUnit": 37.5}, {"Unidade": "Goiânia", "Qtd": 3, "PctUnit": 37.5}, {"Unidade": "Rio de Janeiro", "Qtd": 3, "PctUnit": 21.4}, {"Unidade": "Linhares", "Qtd": 2, "PctUnit": 66.7}, {"Unidade": "Cachoeiro", "Qtd": 2, "PctUnit": 33.3}];
 
 /* HC VALOR TOTAL */
+const HC_ANUAL_LABS = ['Dez/22','Dez/23','Dez/24','Dez/25','Abr/26'];
+const HC_ANUAL_VALS = [327, 291, 310, 300, 290];
 const HCV_LABS = ['Abr/25','Mai/25','Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26','Abr/26'];
 const HCV_TOTAL = [305,305,304,304,309,303,306,303,300,292,295,292,290];
 const HCV_COMERCIAL = [228,228,227,225,225,221,222,221,218,214,217,213,210];
@@ -1081,8 +1092,8 @@ const DL_DEFAULT={color:'#1B3A6B',font:{size:10,weight:'bold'},formatter:v=>(v==
 const NAVY='#1B3A6B',NAVY2='#2D6A9F',GOLD='#C4922A',ORANGE='#E87722';
 const TEAL='#0B6E8C',RED='#9B1C1C',GREEN='#1A6B3C',PURPLE='#5B21B6';
 
-const UNITS     =["Vitória", "São Paulo", "Brasília", "Belo Horizonte", "Nexus", "Rio de Janeiro", "Brumadinho", "Goiânia", "Farmer", "Cachoeiro", "Linhares"];
-const HC_VALS   =[53, 32, 26, 21, 18, 14, 8, 8, 8, 6, 3];
+const UNITS     =["Vitória", "São Paulo", "Brasília", "Belo Horizonte", "Rio de Janeiro", "Brumadinho", "Farmer", "Goiânia", "Cachoeiro", "Linhares"];
+const HC_VALS   =[52, 36, 31, 24, 19, 8, 8, 7, 6, 3];
 const NIVEL_LABS=["Júnior", "Pleno", "Digital/Nexus", "Master", "Sênior I", "Líder", "Part-Time", "Investor", "Líder Full", "Formação", "Gestor", "Sênior II"];
 const NIVEL_VALS=[63, 45, 18, 14, 13, 12, 9, 8, 5, 4, 4, 2];
 const EA_LABS   =[2020, 2021, 2022, 2023, 2024, 2025, 2026];
@@ -1096,10 +1107,10 @@ const MOTIV_VOL =[13, 0, 0, 1, 4, 0, 3, 0, 0, 0, 1];
 const NEL       =["JUNIOR", "PLENO", "SENIOR I", "SENIOR II", "EXTERNO", "TRAINEE", "FARMER", "DIGITAL", "BACKOFFICE", "ESTAGIARIO(A)", "BROKER", "MASTER", "LIDER"];
 const NEV       =[90, 53, 13, 7, 6, 6, 4, 4, 3, 1, 1, 1, 1];
 const ADM_L     =[2008, 2011, 2012, 2014, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
-const ADM_V     =[1, 1, 1, 1, 1, 4, 13, 18, 10, 23, 40, 24, 29, 28, 3];
+const ADM_V     =[1, 1, 1, 1, 1, 4, 13, 18, 10, 22, 40, 24, 29, 24, 4];
 const META_U    =["Vitória", "Cachoeiro", "São Paulo", "Rio de Janeiro", "Brasília", "Goiânia", "Belo Horizonte", "Brumadinho", "Nexus", "Linhares", "Farmer"];
-const META_TGT  =[55, 8, 33, 18, 30, 9, 23, 7, 18, 3, 8];
-const META_ACT  =[53, 6, 32, 14, 26, 8, 21, 8, 18, 3, 8];
+const META_TGT  =[56, 8, 33, 18, 31, 10, 23, 7, 18, 3, 8];
+const META_ACT  =[52, 6, 36, 17, 31, 7, 24, 8, 18, 3, 8];
 const STK_U     =["Brasília", "Goiânia", "São Paulo", "Rio de Janeiro", "Nexus", "Belo Horizonte", "Vitória", "Cachoeiro"];
 const STK_VOL   =[0, 0, 1, 0, 0, 1, 1, 0];
 const STK_INV   =[3, 2, 1, 1, 1, 0, 0, 0];
@@ -1161,8 +1172,8 @@ function buildCharts(tab){
     const ctx=document.getElementById('cMeta'); if(ctx&&!ctx._c)
       ctx._c=new Chart(ctx,{type:'bar',
         data:{labels:META_U,datasets:[
-          {label:'Meta Mar/26',data:META_TGT,backgroundColor:'rgba(196,146,42,.35)',borderColor:GOLD,borderWidth:1.5,borderRadius:4},
-          {label:'Atual Mar/26',data:META_ACT,backgroundColor:META_ACT.map((v,i)=>v>=META_TGT[i]?'rgba(26,107,60,.7)':'rgba(155,28,28,.7)'),borderRadius:4},
+          {label:'Meta Abr/26',data:META_TGT,backgroundColor:'rgba(196,146,42,.35)',borderColor:GOLD,borderWidth:1.5,borderRadius:4},
+          {label:'Atual Abr/26',data:META_ACT,backgroundColor:META_ACT.map((v,i)=>v>=META_TGT[i]?'rgba(26,107,60,.7)':'rgba(155,28,28,.7)'),borderRadius:4},
         ]},
         options:{...defs,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:12}},tooltip:{}},scales:{x:scaleX,y:scaleY}}
       });
@@ -1178,8 +1189,8 @@ function buildCharts(tab){
     const ctx=document.getElementById('cMetaBar'); if(ctx&&!ctx._c)
       ctx._c=new Chart(ctx,{type:'bar',
         data:{labels:META_U,datasets:[
-          {label:'Meta Mar/26',data:META_TGT,backgroundColor:'rgba(196,146,42,.3)',borderColor:GOLD,borderWidth:2,borderRadius:4},
-          {label:'Atual Mar/26',data:META_ACT,backgroundColor:META_ACT.map((v,i)=>v>=META_TGT[i]?'rgba(26,107,60,.75)':'rgba(155,28,28,.75)'),borderRadius:4},
+          {label:'Meta Abr/26',data:META_TGT,backgroundColor:'rgba(196,146,42,.3)',borderColor:GOLD,borderWidth:2,borderRadius:4},
+          {label:'Atual Abr/26',data:META_ACT,backgroundColor:META_ACT.map((v,i)=>v>=META_TGT[i]?'rgba(26,107,60,.75)':'rgba(155,28,28,.75)'),borderRadius:4},
         ]},
         options:{...defs,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:14}},tooltip:{}},scales:{x:scaleX,y:{...scaleY,suggestedMin:0}}}
       });
@@ -1216,6 +1227,19 @@ function buildCharts(tab){
       });
   }
   if(tab==='hcvalor'){
+    /* Barras anuais (Dez de cada ano) */
+    const ca=document.getElementById('cHcAnual'); if(ca&&!ca._c)
+      ca._c=new Chart(ca,{type:'bar',
+        data:{labels:HC_ANUAL_LABS,datasets:[{
+          data:HC_ANUAL_VALS,
+          backgroundColor:HC_ANUAL_LABS.map(l=>l==='Abr/26'?GOLD:NAVY),
+          borderRadius:6,borderSkipped:false}]},
+        options:{...defs,
+          layout:{padding:{top:24}},
+          plugins:{...defs.plugins,
+            datalabels:{...DL_DEFAULT,anchor:'end',align:'end',font:{size:13,weight:'bold'}}},
+          scales:{x:scaleX,y:{...scaleY,suggestedMin:270,suggestedMax:340}}}
+      });
     /* Linha de evolução total */
     const c1=document.getElementById('cHcValorLine'); if(c1&&!c1._c)
       c1._c=new Chart(c1,{type:'line',
