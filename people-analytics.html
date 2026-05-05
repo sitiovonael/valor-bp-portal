@@ -39,6 +39,20 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
 .nt:hover{color:#fff;background:rgba(255,255,255,.14)}
 .nt.on{color:#F5C842;background:rgba(255,255,255,.16)}
 .nt.ext-tab{color:#F5C842}
+/* ── Dropdown nav ── */
+.nav-dd{position:relative}
+.dd-menu{display:none;position:absolute;top:calc(100% + 2px);left:0;z-index:300;
+  background:#1B3A6B;border:1px solid rgba(255,255,255,.22);
+  border-radius:0 8px 8px 8px;min-width:200px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.dd-menu.open{display:block}
+.dd-item{display:block;width:100%;padding:10px 18px;color:rgba(255,255,255,.7);
+  font-size:11px;font-weight:600;background:none;border:none;
+  text-align:left;cursor:pointer;transition:.15s;white-space:nowrap}
+.dd-item:hover{color:#fff;background:rgba(255,255,255,.12)}
+.dd-item.on{color:#F5C842;background:rgba(255,255,255,.1)}
+.dd-item:first-child{border-radius:0 8px 0 0}
+.dd-item:last-child{border-radius:0 0 8px 8px}
 
 /* SECTIONS */
 .sec{display:none;padding:24px 32px 32px}.sec.on{display:block}
@@ -226,14 +240,17 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
     </div>
   </div>
   <div class="nav">
-    <button class="nt on"   onclick="go('overview',this)">Visão Geral</button>
-    <button class="nt"      onclick="go('headcount',this)">Headcount</button>
-    <button class="nt"      onclick="go('metas',this)">Metas Q1</button>
-    <button class="nt"      onclick="go('saidas',this)">Saídas</button>
-    <button class="nt"      onclick="go('retencao',this)">Retenção 180d</button>
-    <button class="nt ext-tab" onclick="go('ext',this)">⭐ Extraordinários</button>
-    <button class="nt"      onclick="go('hcvalor',this)">HC Valor</button>
-    <button class="nt"      onclick="go('detalhe',this)">Detalhe 2025/26</button>
+    <div class="nav-dd" id="ndd-hc">
+      <button class="nt on" id="nb-hc" onclick="toggleDD(event,'hc')">Headcount <span style="opacity:.6;font-size:9px">▾</span></button>
+      <div class="dd-menu" id="ddm-hc">
+        <button class="dd-item"    id="ddi-valor"    onclick="goSub('hcvalor','ddi-valor')">Valor — Visão Geral</button>
+        <button class="dd-item on" id="ddi-hca"      onclick="goSub('hca','ddi-hca')">Headcount Assessoria</button>
+        <button class="dd-item"    id="ddi-metas"    onclick="goSub('metas','ddi-metas')">Metas</button>
+        <button class="dd-item"    id="ddi-saidas"   onclick="goSub('saidas','ddi-saidas')">Saídas</button>
+        <button class="dd-item"    id="ddi-retencao" onclick="goSub('retencao','ddi-retencao')">Retenção 180d</button>
+      </div>
+    </div>
+    <button class="nt ext-tab" id="nb-ext" onclick="goTop('ext',this)">⭐ Extraordinários</button>
   </div>
 </div>
 
@@ -258,7 +275,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 </div>
 
 <!-- ═══ HEADCOUNT ═══ -->
-<div id="tab-headcount" class="sec">
+<div id="tab-headcount" class="sec on">
   <div class="stitle">Headcount Comercial — Abril 2026</div>
   <div class="pg pg31">
     <div class="card">
@@ -1180,6 +1197,46 @@ function go(name,btn){
   if(!window._ci) window._ci={};
   if(!window._ci[name]){ window._ci[name]=1; buildCharts(name); }
 }
+function toggleDD(e,id){
+  e.stopPropagation();
+  var m=document.getElementById('ddm-'+id);
+  var wasOpen=m.classList.contains('open');
+  document.querySelectorAll('.dd-menu').forEach(x=>x.classList.remove('open'));
+  if(!wasOpen) m.classList.add('open');
+}
+function goSub(name,itemId){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dd-item').forEach(i=>i.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  document.getElementById('nb-hc').classList.add('on');
+  document.getElementById(itemId).classList.add('on');
+  if(name==='hca'){
+    document.getElementById('tab-overview').classList.add('on');
+    document.getElementById('tab-headcount').classList.add('on');
+    if(!window._ci) window._ci={};
+    if(!window._ci.overview){window._ci.overview=1;buildCharts('overview');}
+    if(!window._ci.headcount){window._ci.headcount=1;buildCharts('headcount');}
+  } else {
+    document.getElementById('tab-'+name).classList.add('on');
+    if(!window._ci) window._ci={};
+    if(!window._ci[name]){window._ci[name]=1;buildCharts(name);}
+  }
+  document.querySelectorAll('.dd-menu').forEach(x=>x.classList.remove('open'));
+}
+function goTop(name,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.dd-item').forEach(i=>i.classList.remove('on'));
+  document.querySelectorAll('.dd-menu').forEach(x=>x.classList.remove('open'));
+  document.getElementById('tab-'+name).classList.add('on');
+  btn.classList.add('on');
+  if(!window._ci) window._ci={};
+  if(!window._ci[name]){window._ci[name]=1;buildCharts(name);}
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.nav-dd'))
+    document.querySelectorAll('.dd-menu').forEach(x=>x.classList.remove('open'));
+});
 function openPDF(){
   document.getElementById('pdfModal').classList.add('open');
   document.body.style.overflow='hidden';
@@ -1219,7 +1276,7 @@ function ft(){
   });
   document.getElementById('cntLbl').textContent=n+' registros';
 }
-document.addEventListener('DOMContentLoaded',()=>{ft();buildCharts('overview');});
+document.addEventListener('DOMContentLoaded',()=>{ft();buildCharts('overview');buildCharts('headcount');if(!window._ci)window._ci={};window._ci.overview=1;window._ci.headcount=1;});
 
 if(window.ChartDataLabels){Chart.register(ChartDataLabels);}
 const DL_DEFAULT={color:'#1B3A6B',font:{size:10,weight:'bold'},formatter:v=>(v==null||v===0)?'':v};
