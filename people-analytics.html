@@ -351,9 +351,9 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
     <div class="kpi red"><div class="kl">Total Histórico</div><div class="kv">279</div><div class="ks">saídas comerciais</div></div>
     <div class="kpi red"><div class="kl">2025</div><div class="kv">47</div><div class="ks">ano completo</div></div>
     <div class="kpi red"><div class="kl">2026 YTD</div><div class="kv">14</div><div class="ks">Jan–Abr/26</div></div>
-    <div class="kpi green"><div class="kl">Voluntárias 2026</div><div class="kv">3</div><div class="ks">23% das classificadas</div></div>
-    <div class="kpi purple"><div class="kl">Involuntárias 2026</div><div class="kv">8</div><div class="ks">62% das classificadas</div></div>
-    <div class="kpi orange"><div class="kl">Acordo 2026</div><div class="kv">2</div><div class="ks">15% das classificadas</div></div>
+    <div class="kpi green"><div class="kl">Voluntárias 2026</div><div class="kv">4</div><div class="ks">29% das classificadas</div></div>
+    <div class="kpi purple"><div class="kl">Involuntárias 2026</div><div class="kv">8</div><div class="ks">57% das classificadas</div></div>
+    <div class="kpi orange"><div class="kl">Acordo 2026</div><div class="kv">2</div><div class="ks">14% das classificadas</div></div>
   </div>
   <div class="pg pg2">
     <div class="card acc-red"><div class="ct">Saídas por Unidade e Origem — 2026</div><div class="cw tall"><canvas id="cStackSaidas"></canvas></div></div>
@@ -408,7 +408,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 <tr><td class='nc'>Beatriz Silva De Araujo</td><td>03/11/2020</td><td>09/01/2026</td><td class='nc2'><b style='color:var(--green)'>1893</b></td><td>Goiânia</td><td><span class="bdg inv">Involuntário</span></td></tr>
 <tr><td class='nc'>Pedro Henrique Sangaletti Cesar Da Luz</td><td>02/09/2019</td><td>23/03/2026</td><td class='nc2'><b style='color:var(--green)'>2394</b></td><td>Brasília</td><td><span class="bdg inv">Involuntário</span></td></tr>
 <tr><td class='nc'>Luiz Guilherme Beltrao Barcik</td><td>07/07/2025</td><td>09/04/2026</td><td class='nc2'><b style='color:var(--green)'>276</b></td><td>Vitória</td><td><span class="bdg ac">Acordo</span></td></tr>
-<tr><td class='nc'>Bruno Moraes De Caldas</td><td>20/05/2021</td><td>17/04/2026</td><td class='nc2'><b style='color:var(--green)'>1793</b></td><td>São Paulo</td><td><span class="bdg nd">—</span></td></tr>
+<tr><td class='nc'>Bruno Moraes De Caldas</td><td>20/05/2021</td><td>17/04/2026</td><td class='nc2'><b style='color:var(--green)'>1793</b></td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td></tr>
 <tr><td class='nc'>Guilherme De Assis Colosssal</td><td>22/10/2025</td><td>17/04/2026</td><td class='nc2'><b style='color:var(--orange)'>177</b></td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td></tr>
 </tbody>
     </table>
@@ -940,7 +940,7 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 <tr><td class='nc'>Pedro Henrique Sangaletti Cesar Da Luz</td><td>23/03/2026</td><td>Brasília</td><td><span class="bdg inv">Involuntário</span></td><td>COMPLIANCE</td><td>—</td><td>Saiu</td></tr>
 <tr><td class='nc'>Ana Carolina Felix Martins</td><td>30/03/2026</td><td>Goiânia</td><td><span class="bdg inv">Involuntário</span></td><td>BAIXA PERF</td><td>JUNIOR</td><td>Saiu</td></tr>
 <tr><td class='nc'>Luiz Guilherme Beltrao Barcik</td><td>09/04/2026</td><td>Vitória</td><td><span class="bdg ac">Acordo</span></td><td>PESSOAL</td><td>JUNIOR</td><td>Saiu</td></tr>
-<tr><td class='nc'>Bruno Moraes De Caldas</td><td>17/04/2026</td><td>São Paulo</td><td><span class="bdg nd">—</span></td><td>—</td><td>SENIOR II</td><td>Saiu</td></tr>
+<tr><td class='nc'>Bruno Moraes De Caldas</td><td>17/04/2026</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>PESSOAL</td><td>SENIOR II</td><td>Saiu</td></tr>
 <tr><td class='nc'>Guilherme De Assis Colosssal</td><td>17/04/2026</td><td>São Paulo</td><td><span class="bdg vol">Voluntário</span></td><td>OUTRA OPORTUNIDADE</td><td>JUNIOR</td><td>Saiu</td></tr>
 </tbody>
     </table>
@@ -1035,8 +1035,8 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
       <div class="pdf-body">
         <div class="pdf-kpis4">
           <div class="pdf-kpi"><div class="pdf-kpi-lbl">Saídas 2026 YTD</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--red)">14</div><div class="pdf-kpi-sub">Jan–Abr/26</div></div>
-          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Involuntárias 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--red)">8</div><div class="pdf-kpi-sub">62% das classificadas</div></div>
-          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Voluntárias 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--green)">3</div><div class="pdf-kpi-sub">23% das classificadas</div></div>
+          <div class="pdf-kpi red"><div class="pdf-kpi-lbl">Involuntárias 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--red)">8</div><div class="pdf-kpi-sub">57% das classificadas</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-lbl">Voluntárias 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--green)">4</div><div class="pdf-kpi-sub">29% das classificadas</div></div>
           <div class="pdf-kpi"><div class="pdf-kpi-lbl">Acordo 2026</div><div class="pdf-kpi-val" style="font-size:22px;color:var(--gold)">2</div><div class="pdf-kpi-sub">14% das classificadas</div></div>
         </div>
         <div class="pdf-section-title">Motivos de Saída — 2026</div>
@@ -1247,7 +1247,7 @@ const META_U    =["Vitória", "Cachoeiro", "São Paulo", "Rio de Janeiro", "Bras
 const META_TGT  =[56, 8, 33, 18, 31, 10, 23, 7, 18, 3, 8];
 const META_ACT  =[51, 5, 31, 17, 26, 7, 22, 8, 15, 3, 8];
 const STK_U     =["Brasília", "Goiânia", "São Paulo", "Rio de Janeiro", "Nexus", "Belo Horizonte", "Vitória", "Cachoeiro"];
-const STK_VOL   =[0, 0, 1, 0, 0, 1, 1, 0];
+const STK_VOL   =[0, 0, 2, 0, 0, 1, 1, 0];
 const STK_INV   =[3, 2, 1, 1, 1, 0, 0, 0];
 const STK_AC    =[0, 0, 0, 0, 0, 0, 1, 1];
 const DIAS_VALS =[177, 276, 274, 2394, 215, 1893, 370, 655, 464, 1243, 1430, 180, 1172, 1793];
