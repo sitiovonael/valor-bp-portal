@@ -53,6 +53,13 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
 .dd-item.on{color:#F5C842;background:rgba(255,255,255,.1)}
 .dd-item:first-child{border-radius:0 8px 0 0}
 .dd-item:last-child{border-radius:0 0 8px 8px}
+/* ── Sub-nav interno (ex: Saídas) ── */
+.subnav{display:flex;gap:4px;margin-bottom:24px;padding-bottom:2px;border-bottom:2px solid rgba(27,58,107,.12)}
+.snt{padding:7px 16px;border-radius:6px 6px 0 0;font-size:11px;font-weight:700;
+  color:var(--navy);background:none;border:none;cursor:pointer;opacity:.45;transition:.15s}
+.snt:hover{opacity:.8;background:rgba(27,58,107,.07)}
+.snt.on{opacity:1;background:rgba(27,58,107,.09);border-bottom:2px solid var(--navy);margin-bottom:-2px}
+.ssub{display:none}.ssub.on{display:block}
 
 /* SECTIONS */
 .sec{display:none;padding:24px 32px 32px}.sec.on{display:block}
@@ -363,7 +370,31 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 
 <!-- ═══ SAÍDAS ═══ -->
 <div id="tab-saidas" class="sec">
-  <div class="stitle">Saídas Comerciais — Assessoria de Investimentos</div>
+  <div class="stitle">Análise de Saídas</div>
+
+  <!-- Sub-nav interno -->
+  <div class="subnav">
+    <button class="snt"    id="snt-vg"     onclick="goSubSaidas('vg')">Visão Geral</button>
+    <button class="snt on" id="snt-asses"  onclick="goSubSaidas('asses')">Saídas Assessoria</button>
+    <button class="snt"    id="snt-outras" onclick="goSubSaidas('outras')">Saídas Outras Áreas</button>
+  </div>
+
+  <!-- ── SUB: Visão Geral ── -->
+  <div id="ssaidas-vg" class="ssub">
+    <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:680px">
+      <div class="kpi red"><div class="kl">Saídas Assessoria 2026</div><div class="kv">14</div><div class="ks">Jan–Abr/26 YTD</div></div>
+      <div class="kpi red"><div class="kl">Saídas Assessoria 2025</div><div class="kv">47</div><div class="ks">ano completo</div></div>
+      <div class="kpi"><div class="kl">Saídas Outras Áreas</div><div class="kv">—</div><div class="ks">dados a incluir</div></div>
+      <div class="kpi"><div class="kl">Total Geral 2026</div><div class="kv">—</div><div class="ks">dados a incluir</div></div>
+    </div>
+    <div class="card" style="margin-top:20px;padding:40px;text-align:center;color:#aaa;font-size:13px">
+      📋 Visão consolidada de saídas de todas as áreas — em construção.<br>
+      <span style="font-size:11px;margin-top:6px;display:block">Inclui Assessoria, Suporte ao Negócio, Produtos, Seguridade e Wealth.</span>
+    </div>
+  </div>
+
+  <!-- ── SUB: Saídas Assessoria (conteúdo atual) ── -->
+  <div id="ssaidas-asses" class="ssub on">
   <div class="kpig">
     <div class="kpi red"><div class="kl">Total Histórico</div><div class="kv">279</div><div class="ks">saídas comerciais</div></div>
     <div class="kpi red"><div class="kl">2025</div><div class="kv">47</div><div class="ks">ano completo</div></div>
@@ -398,6 +429,16 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
     <div class="card acc-teal"><div class="ct">Saídas por Nível (Histórico)</div><div class="cw short"><canvas id="cNivelExits"></canvas></div></div>
   </div>
   <div class="fonte"><b>Fonte:</b> Lista de Usuários 31-03-2026.xlsx · Filtro: Cargo Comercial</div>
+  </div><!-- /ssaidas-asses -->
+
+  <!-- ── SUB: Saídas Outras Áreas ── -->
+  <div id="ssaidas-outras" class="ssub">
+    <div class="card" style="margin-top:4px;padding:40px;text-align:center;color:#aaa;font-size:13px">
+      📋 Saídas de outras áreas (Suporte ao Negócio, Produtos, Seguridade e Empresas, Wealth) — em construção.<br>
+      <span style="font-size:11px;margin-top:6px;display:block">Inclua os dados da base de usuários para habilitarmos essa visão.</span>
+    </div>
+  </div><!-- /ssaidas-outras -->
+
 </div>
 
 <!-- ═══ RETENÇÃO ═══ -->
@@ -1218,6 +1259,13 @@ function goSub(name,itemId){
     if(!window._ci.headcount){window._ci.headcount=1;buildCharts('headcount');}
   } else {
     document.getElementById('tab-'+name).classList.add('on');
+    // reset sub-navs ao trocar de seção
+    if(name==='saidas'){
+      document.querySelectorAll('.snt').forEach(b=>b.classList.remove('on'));
+      document.querySelectorAll('.ssub').forEach(s=>s.classList.remove('on'));
+      document.getElementById('snt-asses').classList.add('on');
+      document.getElementById('ssaidas-asses').classList.add('on');
+    }
     if(!window._ci) window._ci={};
     if(!window._ci[name]){window._ci[name]=1;buildCharts(name);}
   }
@@ -1237,6 +1285,12 @@ document.addEventListener('click',function(e){
   if(!e.target.closest('.nav-dd'))
     document.querySelectorAll('.dd-menu').forEach(x=>x.classList.remove('open'));
 });
+function goSubSaidas(sub){
+  document.querySelectorAll('.snt').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ssub').forEach(s=>s.classList.remove('on'));
+  document.getElementById('snt-'+sub).classList.add('on');
+  document.getElementById('ssaidas-'+sub).classList.add('on');
+}
 function openPDF(){
   document.getElementById('pdfModal').classList.add('open');
   document.body.style.overflow='hidden';
