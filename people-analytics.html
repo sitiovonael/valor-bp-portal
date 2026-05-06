@@ -381,16 +381,41 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 
   <!-- ── SUB: Visão Geral ── -->
   <div id="ssaidas-vg" class="ssub">
-    <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:680px">
-      <div class="kpi red"><div class="kl">Saídas Assessoria 2026</div><div class="kv">14</div><div class="ks">Jan–Abr/26 YTD</div></div>
-      <div class="kpi red"><div class="kl">Saídas Assessoria 2025</div><div class="kv">47</div><div class="ks">ano completo</div></div>
-      <div class="kpi"><div class="kl">Saídas Outras Áreas</div><div class="kv">—</div><div class="ks">dados a incluir</div></div>
-      <div class="kpi"><div class="kl">Total Geral 2026</div><div class="kv">—</div><div class="ks">dados a incluir</div></div>
+    <div class="kpig" style="grid-template-columns:repeat(4,1fr);max-width:760px">
+      <div class="kpi red"><div class="kl">Total Geral 2026 YTD</div><div class="kv">19</div><div class="ks">todas as verticais Jan–Abr</div></div>
+      <div class="kpi red"><div class="kl">Assessoria 2026</div><div class="kv">14</div><div class="ks">74% das saídas 2026</div></div>
+      <div class="kpi red"><div class="kl">Outras Áreas 2026</div><div class="kv">5</div><div class="ks">26% das saídas 2026</div></div>
+      <div class="kpi red"><div class="kl">Total Geral 2025</div><div class="kv">66</div><div class="ks">Assessoria 47 + Outras 19</div></div>
     </div>
-    <div class="card" style="margin-top:20px;padding:40px;text-align:center;color:#aaa;font-size:13px">
-      📋 Visão consolidada de saídas de todas as áreas — em construção.<br>
-      <span style="font-size:11px;margin-top:6px;display:block">Inclui Assessoria, Suporte ao Negócio, Produtos, Seguridade e Wealth.</span>
+    <div class="pg pg2" style="margin-top:20px">
+      <div class="card acc-red">
+        <div class="ct">Outras Áreas — Saídas por Vertical (2025/26)</div>
+        <table><thead><tr><th>Vertical</th><th class="nc2">2025</th><th class="nc2">2026</th><th class="nc2">Total</th></tr></thead>
+          <tbody>
+            <tr><td>Suporte ao Negócio</td><td class="nc2"><span class="yr25">10</span></td><td class="nc2"><span class="yr26">2</span></td><td class="nc2"><b>12</b></td></tr>
+            <tr><td>Produtos</td><td class="nc2"><span class="yr25">2</span></td><td class="nc2"><span class="yr26">3</span></td><td class="nc2"><b>5</b></td></tr>
+            <tr><td>Seguridade e Empresas</td><td class="nc2"><span class="yr25">5</span></td><td class="nc2">—</td><td class="nc2"><b>5</b></td></tr>
+            <tr><td>Wealth</td><td class="nc2"><span class="yr25">2</span></td><td class="nc2">—</td><td class="nc2"><b>2</b></td></tr>
+          </tbody>
+          <tfoot><tr><td><b>TOTAL OUTRAS ÁREAS</b></td><td class="nc2"><b>19</b></td><td class="nc2"><b>5</b></td><td class="nc2"><b>24</b></td></tr></tfoot>
+        </table>
+      </div>
+      <div class="card">
+        <div class="ct">Comparativo Geral — Todas as Verticais 2026</div>
+        <table><thead><tr><th>Vertical</th><th class="nc2">Saídas 2026</th><th class="nc2">% do Total</th></tr></thead>
+          <tbody>
+            <tr><td><b>Assessoria Comercial</b></td><td class="nc2"><span class="yr26">14</span></td><td class="nc2"><b>74%</b></td></tr>
+            <tr><td>Produtos</td><td class="nc2">3</td><td class="nc2">16%</td></tr>
+            <tr><td>Suporte ao Negócio</td><td class="nc2">2</td><td class="nc2">10%</td></tr>
+            <tr><td>Seguridade e Empresas</td><td class="nc2">—</td><td class="nc2">0%</td></tr>
+            <tr><td>Wealth</td><td class="nc2">—</td><td class="nc2">0%</td></tr>
+          </tbody>
+          <tfoot><tr><td><b>TOTAL GERAL</b></td><td class="nc2"><b>19</b></td><td class="nc2"><b>100%</b></td></tr></tfoot>
+        </table>
+        <div class="note" style="margin-top:12px">2025 total: <b>66 saídas</b> (Assessoria 47 + Outras Áreas 19)</div>
+      </div>
     </div>
+    <div class="fonte"><b>Fontes:</b> data(16).xlsx (Assessoria Comercial) · Lista de Usuários 27-04-2026.xlsx (demais verticais)</div>
   </div>
 
   <!-- ── SUB: Saídas Assessoria (conteúdo atual) ── -->
@@ -433,10 +458,57 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 
   <!-- ── SUB: Saídas Outras Áreas ── -->
   <div id="ssaidas-outras" class="ssub">
-    <div class="card" style="margin-top:4px;padding:40px;text-align:center;color:#aaa;font-size:13px">
-      📋 Saídas de outras áreas (Suporte ao Negócio, Produtos, Seguridade e Empresas, Wealth) — em construção.<br>
-      <span style="font-size:11px;margin-top:6px;display:block">Inclua os dados da base de usuários para habilitarmos essa visão.</span>
+    <div class="kpig">
+      <div class="kpi red"><div class="kl">Total Histórico</div><div class="kv">122</div><div class="ks">saídas outras áreas (2021+)</div></div>
+      <div class="kpi red"><div class="kl">2025</div><div class="kv">19</div><div class="ks">ano completo</div></div>
+      <div class="kpi red"><div class="kl">2026 YTD</div><div class="kv">5</div><div class="ks">Jan–Abr/26</div></div>
+      <div class="kpi green"><div class="kl">Voluntárias 2026</div><div class="kv">2</div><div class="ks">40% das saídas 2026</div></div>
+      <div class="kpi purple"><div class="kl">Involuntárias 2026</div><div class="kv">2</div><div class="ks">40% das saídas 2026</div></div>
+      <div class="kpi orange"><div class="kl">Acordo 2026</div><div class="kv">1</div><div class="ks">20% das saídas 2026</div></div>
     </div>
+    <div class="pg pg2">
+      <div class="card acc-red">
+        <div class="ct">Saídas por Área de Negócio — 2026</div>
+        <div class="cw tall"><canvas id="cOaStack"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ct">Saídas por Área — Histórico</div>
+        <table><thead><tr><th>Área</th><th class="nc2">Total</th><th class="nc2">2025</th><th class="nc2">2026</th></tr></thead>
+          <tbody>
+            <tr><td>Distribuição</td><td class="nc2"><b>19</b></td><td class="nc2"><span class="yr25">1</span></td><td class="nc2"><span class="yr26">2</span></td></tr>
+            <tr><td>Previdência e Seguros PJ</td><td class="nc2"><b>18</b></td><td class="nc2"><span class="yr25">4</span></td><td class="nc2">—</td></tr>
+            <tr><td>Gente e Gestão</td><td class="nc2"><b>16</b></td><td class="nc2"><span class="yr25">7</span></td><td class="nc2"><span class="yr26">1</span></td></tr>
+            <tr><td>Marketing</td><td class="nc2"><b>13</b></td><td class="nc2"><span class="yr25">1</span></td><td class="nc2">—</td></tr>
+            <tr><td>VGR Asset</td><td class="nc2"><b>10</b></td><td class="nc2"><span class="yr25">2</span></td><td class="nc2">—</td></tr>
+            <tr><td>Eng. e Seg. de Dados</td><td class="nc2"><b>6</b></td><td class="nc2"><span class="yr25">2</span></td><td class="nc2">—</td></tr>
+            <tr><td>Admin. Financeiro</td><td class="nc2"><b>6</b></td><td class="nc2">—</td><td class="nc2"><span class="yr26">1</span></td></tr>
+            <tr><td>Créd./Merc./Câmbio PJ</td><td class="nc2"><b>5</b></td><td class="nc2"><span class="yr25">1</span></td><td class="nc2">—</td></tr>
+            <tr><td>Alocação</td><td class="nc2"><b>4</b></td><td class="nc2"><span class="yr25">1</span></td><td class="nc2"><span class="yr26">2</span></td></tr>
+            <tr><td>Outras áreas</td><td class="nc2"><b>26</b></td><td class="nc2">—</td><td class="nc2">—</td></tr>
+          </tbody>
+          <tfoot><tr><td><b>TOTAL</b></td><td class="nc2">123</td><td class="nc2">19</td><td class="nc2">6</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="pg pg3" style="margin-top:20px">
+      <div class="card acc-red">
+        <div class="ct">Entradas vs Saídas por Ano</div>
+        <div class="cw short"><canvas id="cOaYear"></canvas></div>
+      </div>
+      <div class="card acc-red">
+        <div class="ct">Motivos de Saída — Voluntário vs Involuntário (2025/26)</div>
+        <div class="cw short"><canvas id="cOaMotivo"></canvas></div>
+      </div>
+      <div class="card acc-teal">
+        <div class="ct">Saídas por Vertical (2025/26)</div>
+        <div class="cw short"><canvas id="cOaVert"></canvas></div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:12px">
+      <b>2026 (5 saídas, todas classificadas):</b> Voluntário: 2 (Distribuição · Remuneração; Alocação · Pessoal) · Involuntário: 2 (Gente e Gestão · ANCORD; Distribuição · Fim de Contrato) · Acordo: 1 (Admin. Financeiro · Pessoal)<br>
+      <b>2025:</b> Voluntário: 15 · Acordo: 2 · Involuntário: 2 · Principal motivo voluntário: Outra Oportunidade (11)
+    </div>
+    <div class="fonte"><b>Fonte:</b> Lista de Usuários 27-04-2026.xlsx · Filtro: Tipo AAI RH ≠ Comercial · excluindo Assessores PJ e Farmer</div>
   </div><!-- /ssaidas-outras -->
 
 </div>
@@ -1210,6 +1282,20 @@ select{border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-si
 
 <!-- ═══ SCRIPTS ═══ -->
 <script>
+/* ── Saídas Outras Áreas ── */
+const OA_LABS   = [2021,2022,2023,2024,2025,2026];
+const OA_SAI    = [8,39,38,13,19,5];
+const OA_ENT    = [47,62,11,17,24,4];
+const OA_STK_U  = ["Distribuição","Alocação","Gente e Gestão","Admin. Financeiro"];
+const OA_STK_VOL= [1,1,0,0];
+const OA_STK_INV= [1,0,1,0];
+const OA_STK_AC = [0,0,0,1];
+const OA_MOT_L  = ["OUTRA OPP","REMUNERAÇÃO","PESSOAL","INCOMPATIB","CONC ESC","OUTROS","ANCORD","PERFORMANCE","FIM CONTRATO"];
+const OA_MOT_VOL= [11,1,2,1,1,1,0,0,0];
+const OA_MOT_INV= [0,0,0,1,0,0,1,1,1];
+const OA_VERT_L = ["Suporte ao Negócio","Produtos","Seguridade e Emp.","Wealth"];
+const OA_VERT_V = [12,5,5,2];
+
 const EXT_DATA=[{"Unidade": "Vitória", "Qtd": 13, "PctUnit": 25.5}, {"Unidade": "Brasília", "Qtd": 12, "PctUnit": 46.2}, {"Unidade": "São Paulo", "Qtd": 9, "PctUnit": 29.0}, {"Unidade": "Nexus", "Qtd": 6, "PctUnit": 40.0}, {"Unidade": "Belo Horizonte", "Qtd": 4, "PctUnit": 18.2}, {"Unidade": "Brumadinho", "Qtd": 3, "PctUnit": 37.5}, {"Unidade": "Goiânia", "Qtd": 3, "PctUnit": 42.9}, {"Unidade": "Rio de Janeiro", "Qtd": 3, "PctUnit": 17.6}, {"Unidade": "Linhares", "Qtd": 2, "PctUnit": 66.7}, {"Unidade": "Cachoeiro", "Qtd": 2, "PctUnit": 40.0}];
 
 /* HC VALOR TOTAL */
@@ -1290,6 +1376,23 @@ function goSubSaidas(sub){
   document.querySelectorAll('.ssub').forEach(s=>s.classList.remove('on'));
   document.getElementById('snt-'+sub).classList.add('on');
   document.getElementById('ssaidas-'+sub).classList.add('on');
+  if(sub==='outras' && !window._ci_oa){window._ci_oa=1; setTimeout(buildOACharts,0);}
+}
+function buildOACharts(){
+  stacked('cOaStack',OA_STK_U,[
+    {label:'Voluntário',  data:OA_STK_VOL,backgroundColor:GREEN,borderRadius:2},
+    {label:'Involuntário',data:OA_STK_INV,backgroundColor:RED,  borderRadius:2},
+    {label:'Acordo',      data:OA_STK_AC, backgroundColor:GOLD, borderRadius:2},
+  ]);
+  grouped('cOaYear',OA_LABS.map(String),[
+    {label:'Saídas',  data:OA_SAI,backgroundColor:RED,  borderRadius:4},
+    {label:'Entradas',data:OA_ENT,backgroundColor:GREEN,borderRadius:4},
+  ]);
+  stacked('cOaMotivo',OA_MOT_L,[
+    {label:'Involuntário',data:OA_MOT_INV,backgroundColor:RED,  borderRadius:2},
+    {label:'Voluntário',  data:OA_MOT_VOL,backgroundColor:GREEN,borderRadius:2},
+  ]);
+  hbar('cOaVert',OA_VERT_L,OA_VERT_V,TEAL);
 }
 function openPDF(){
   document.getElementById('pdfModal').classList.add('open');
